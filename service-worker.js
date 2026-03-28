@@ -7,11 +7,11 @@ self.addEventListener('install', (e) => {
       './index.html',
       './offline.html',
       './manifest.webmanifest',
-      './styles.css',
-      './app.js',
-      './adhkar.json',
-      './icon-192.png',
-      './icon-512.png'
+      './css/styles.css',
+      './js/app.js',
+      './js/adhkar.json',
+      './assets/icons/icon-192.png',
+      './assets/icons/icon-512.png'
     ]))
   );
 });
