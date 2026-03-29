@@ -1,0 +1,34 @@
+{
+  "useful": [
+    {
+      "group": "القرآن الكريم",
+      "items": [
+        {
+          "title": "Quran.com",
+          "url": "https://quran.com/",
+          "desc": "قراءة القرآن مع التلاوات والترجمات."
+        },
+        {
+          "title": "آيات",
+          "url": "https://quran.ksu.edu.sa/",
+          "desc": "مصحف وتفاسير وبحث."
+        }
+      ]
+    },
+    {
+      "group": "الحديث الشريف",
+      "items": [
+        {
+          "title": "الدرر السنية",
+          "url": "https://dorar.net/hadith",
+          "desc": "التحقق من صحة الحديث."
+        },
+        {
+          "title": "Sunnah.com",
+          "url": "https://sunnah.com/",
+          "desc": "كتب الحديث مع البحث."
+        }
+      ]
+    }
+  ]
+}
