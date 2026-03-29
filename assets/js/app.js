@@ -1,4 +1,4 @@
-// Rafiq Muslim v0.5.1 - Config Relocated
+// Rafiq Muslim v0.6.0 - App-like Layout & Smart Cache
 const API_BASE='https://api.aladhan.com/v1';
 const KAABA={lat:21.4225,lon:39.8262};
 const BDC_REVERSE='https://api-bdc.net/data/reverse-geocode-client';
@@ -18,27 +18,15 @@ function toRad(x){return x*Math.PI/180} function toDeg(x){return x*180/Math.PI} 
 function formatTime12h(d){try{return new Intl.DateTimeFormat('ar',{hour:'numeric',minute:'2-digit',hour12:true}).format(d)}catch(e){let h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0');const suf=h>=12?'م':'ص';h=h%12||12;return `${h}:${m} ${suf}`;}}
 
 async function fetchJSON(url, defaultData) {
-    try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('HTTP error ' + res.status);
-        return await res.json();
-    } catch(e) {
-        console.warn('Fallback applied for:', url);
-        return defaultData;
-    }
+    try { const res = await fetch(url); if (!res.ok) throw new Error(); return await res.json(); } 
+    catch(e) { return defaultData; }
 }
 
 function renderHijri(){
   try{
-    const d = new Date();
-    const adj = parseInt(LS('hijriAdj')) || 0;
-    d.setDate(d.getDate() + adj);
-    const f=new Intl.DateTimeFormat('ar-SA-u-ca-islamic',{day:'numeric',month:'long',year:'numeric'}); 
-    setText('hijri',f.format(d));
-    const parts = f.formatToParts(d);
-    const dayPart = parts.find(p => p.type === 'day')?.value;
-    const dayNum = parseInt(dayPart);
-    const weekday = d.getDay();
+    const d = new Date(); const adj = parseInt(LS('hijriAdj')) || 0; d.setDate(d.getDate() + adj);
+    const f=new Intl.DateTimeFormat('ar-SA-u-ca-islamic',{day:'numeric',month:'long',year:'numeric'}); setText('hijri',f.format(d));
+    const parts = f.formatToParts(d); const dayNum = parseInt(parts.find(p => p.type === 'day')?.value); const weekday = d.getDay();
     let msg = '';
     if (dayNum === 12 || dayNum === 13 || dayNum === 14) msg = 'غداً من الأيام البيض، تذكير بالصيام 🌙';
     if (weekday === 0) msg = 'غداً الإثنين، تذكير بالصيام 🌙';
@@ -46,60 +34,49 @@ function renderHijri(){
     setText('fastingReminder', msg);
   }catch(e){setText('hijri','—')}
 }
+
 function translatePrayer(k){return ({Fajr:'الفجر',Sunrise:'الشروق',Dhuhr:'الظهر',Asr:'العصر',Maghrib:'المغرب',Isha:'العشاء'})[k]||k;}
 function computeDuha(s,d){return {start:new Date(isoToDate(s).getTime()+CFG.duha.startOffsetAfterSunriseMin*60000), end:new Date(isoToDate(d).getTime()-CFG.duha.endOffsetBeforeDhuhrMin*60000)}}
 function computeLastThird(m,f){const magh=isoToDate(m), fajr=isoToDate(f); let night=fajr-magh; if(night<=0) night+=86400000; const third=night/3; return {start:new Date(fajr.getTime()-third), end:fajr}}
 function bearing(lat1,lon1,lat2,lon2){const φ1=toRad(lat1),φ2=toRad(lat2),λ1=toRad(lon1),λ2=toRad(lon2); const y=Math.sin(λ2-λ1)*Math.cos(φ2),x=Math.cos(φ1)*Math.sin(φ2)-Math.sin(φ1)*Math.cos(φ2)*Math.cos(λ2-λ1); return normalize360(toDeg(Math.atan2(y,x)));}
 
-async function fetchTimingsByCoords(date,lat,lon, methodOverride){const m = methodOverride || CFG.calculation.method; const ds=dateToApi(date); const u=`${API_BASE}/timings/${ds}?latitude=${lat}&longitude=${lon}&method=${m}&school=${CFG.calculation.school}&iso8601=true`; const r=await fetch(u); const j=await r.json(); if(j.code!==200) throw new Error('API'); return j.data;}
-async function fetchTimingsByCity(date,city,country, methodOverride){const m = methodOverride || CFG.calculation.method; const ds=dateToApi(date); const u=`${API_BASE}/timingsByCity/${ds}?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&method=${m}&school=${CFG.calculation.school}&iso8601=true`; const r=await fetch(u); const j=await r.json(); if(j.code!==200) throw new Error('API'); return j.data;}
+async function fetchTimingsByCoords(date,lat,lon, methodOverride){const m = methodOverride || CFG.calculation.method; const ds=dateToApi(date); const u=`${API_BASE}/timings/${ds}?latitude=${lat}&longitude=${lon}&method=${m}&school=${CFG.calculation.school}&iso8601=true`; const r=await fetch(u); const j=await r.json(); if(j.code!==200) throw new Error(); return j.data;}
+async function fetchTimingsByCity(date,city,country, methodOverride){const m = methodOverride || CFG.calculation.method; const ds=dateToApi(date); const u=`${API_BASE}/timingsByCity/${ds}?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&method=${m}&school=${CFG.calculation.school}&iso8601=true`; const r=await fetch(u); const j=await r.json(); if(j.code!==200) throw new Error(); return j.data;}
 
 function initScheme() {
-  const savedScheme = LS('scheme') || 'brown';
-  document.documentElement.setAttribute('data-scheme', savedScheme);
+  const savedScheme = LS('scheme') || 'brown'; document.documentElement.setAttribute('data-scheme', savedScheme);
   document.querySelectorAll('.color-dot').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const val = e.target.getAttribute('data-val');
-      document.documentElement.setAttribute('data-scheme', val);
-      LS('scheme', val);
-    });
+    btn.addEventListener('click', (e) => { const val = e.target.getAttribute('data-val'); document.documentElement.setAttribute('data-scheme', val); LS('scheme', val); });
   });
 }
 
-function applyFontSize() {
-  document.body.style.fontSize = currentFontSize + 'rem';
-  LS('fontSize', currentFontSize);
-}
+function applyFontSize() { document.body.style.fontSize = currentFontSize + 'rem'; LS('fontSize', currentFontSize); }
 
-function checkNotify(prayerName) {
-  if (window.Notification && Notification.permission === 'granted') {
-    new Notification('رفيق المسلم', { body: 'حان الآن موعد صلاة ' + prayerName, icon: './assets/img/icon-192.png' });
-  }
-}
+function checkNotify(prayerName) { if (window.Notification && Notification.permission === 'granted') { new Notification('رفيق المسلم', { body: 'حان الآن موعد صلاة ' + prayerName, icon: './assets/img/icon-192.png' }); } }
 
 function initUI() {
   qs('#btnTextInc')?.addEventListener('click', () => { currentFontSize += 0.1; applyFontSize(); });
   qs('#btnTextDec')?.addEventListener('click', () => { currentFontSize = Math.max(1, currentFontSize - 0.1); applyFontSize(); });
   qs('#toggleTashkeel')?.addEventListener('click', () => { 
     showTashkeel = !showTashkeel; LS('tashkeel', showTashkeel);
-    if(loaded.adhkar && rawAdhkarData) {
-      const activeBtn = qs('#adhkarPills button.active');
-      if(activeBtn) renderDhikrList(qs('#adhkarContainer'), rawAdhkarData[activeBtn.dataset.key]||[], activeBtn.dataset.key);
-    }
+    if(loaded.adhkar && rawAdhkarData) { const activeBtn = qs('#adhkarPills button.active'); if(activeBtn) renderDhikrList(qs('#adhkarContainer'), rawAdhkarData[activeBtn.dataset.key]||[], activeBtn.dataset.key); }
   });
-  qs('#btnNotify')?.addEventListener('click', () => {
-    if(!('Notification' in window)) return alert('متصفحك لا يدعم التنبيهات');
-    Notification.requestPermission().then(p => { if(p==='granted') alert('تم تفعيل تنبيهات الأذان بنجاح ✓'); });
-  });
-  
-  let hijriAdj = parseInt(LS('hijriAdj')) || 0;
-  const hSel = qs('#hijriAdjSelect');
+  qs('#btnNotify')?.addEventListener('click', () => { if(!('Notification' in window)) return alert('متصفحك لا يدعم التنبيهات'); Notification.requestPermission().then(p => { if(p==='granted') alert('تم تفعيل تنبيهات الأذان بنجاح ✓'); }); });
+  let hijriAdj = parseInt(LS('hijriAdj')) || 0; const hSel = qs('#hijriAdjSelect');
   if(hSel){ hSel.value = String(hijriAdj); hSel.addEventListener('change', (e) => { LS('hijriAdj', parseInt(e.target.value)); renderHijri(); }); }
   applyFontSize();
 }
 
 function showSection(id){qsa('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.target===id)); qsa('.section').forEach(s=>s.classList.toggle('active',s.id===id));}
-function initNav(){qsa('.bottom-nav button').forEach(btn=>btn.addEventListener('click',async()=>{const id=btn.dataset.target; showSection(id); if(id==='adhkar'&&!loaded.adhkar){loaded.adhkar=true; await loadAdhkar();} if(id==='resources'&&!loaded.resources){loaded.resources=true; await loadResources();} if(id==='learning'&&!loaded.learning){loaded.learning=true; await loadLearning();} window.scrollTo({top:0,behavior:'smooth'});}));}
+function initNav(){
+  qsa('.bottom-nav button').forEach(btn=>btn.addEventListener('click',async()=>{
+    const id=btn.dataset.target; showSection(id); 
+    if(id==='adhkar'&&!loaded.adhkar){loaded.adhkar=true; await loadAdhkar();} 
+    if(id==='learning'&&!loaded.learning){loaded.learning=true; await Promise.all([loadLearning(), loadResources(), loadDailyBenefit()]);} 
+    qs('main').scrollTo({top:0,behavior:'smooth'});
+  }));
+}
+
 function initCityList(){
   const cities=[{label:'الرياض',city:'Riyadh',country:'SA'},{label:'مكة المكرمة',city:'Makkah',country:'SA'},{label:'المدينة المنورة',city:'Al Madinah al Munawwarah',country:'SA'},{label:'جدة',city:'Jeddah',country:'SA'},{label:'الدمام',city:'Dammam',country:'SA'},{label:'الطائف',city:'Taif',country:'SA'},{label:'أبها',city:'Abha',country:'SA'},{label:'تبوك',city:'Tabuk',country:'SA'}]; 
   const sel=qs('#citySelect'); if(!sel) return; 
@@ -111,6 +88,7 @@ function getCityFallback(){const v=LS('cityFallback'); if(v) try{return JSON.par
 function updateCityKPI(t){setText('cityDisplay',t||'—')}
 function updateCityKPIFromSelect(){const sel=qs('#citySelect'); if(sel&&sel.value) try{const o=JSON.parse(sel.value); updateCityKPI(o.label||o.city)}catch(e){} else {const c=getCityFallback(); updateCityKPI(c.label||c.city||'—')}}
 async function reverseGeocodeCity(lat,lon){const key=`rg:${lat.toFixed(3)},${lon.toFixed(3)}`; const cached=LS(key); if(cached) try{return JSON.parse(cached)}catch(e){} const u=`${BDC_REVERSE}?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&localityLanguage=ar`; const r=await fetch(u); const j=await r.json(); const out={city:j.city||j.locality||j.principalSubdivision||null}; LS(key,JSON.stringify(out)); return out;}
+
 function renderNextPrayer(T,fajrTomorrowISO){
   const order=['Fajr','Dhuhr','Asr','Maghrib','Isha']; const now=new Date(); let nextName=null,time=null, currName='Isha'; 
   for(let i=0; i<order.length; i++){const k = order[i]; const d=isoToDate(T[k]); if(d>now){nextName=k; time=d; currName = i === 0 ? 'Isha' : order[i-1]; break;}} 
@@ -127,6 +105,7 @@ function renderNextPrayer(T,fajrTomorrowISO){
     else setText('nextCountdown',`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
   },1000);
 }
+
 function setQiblaFromCoords(lat,lon){const b=bearing(lat,lon,KAABA.lat,KAABA.lon); setText('qiblaDeg',`${b.toFixed(1)}°`); LS('qiblaBearing',String(b));}
 function loadStoredQibla(){const v=LS('qiblaBearing'); if(v) setText('qiblaDeg',`${parseFloat(v).toFixed(1)}°`)}
 
@@ -221,6 +200,32 @@ async function loadAdhkar(){
   function activate(key){qsa('#adhkarPills button').forEach(b=>b.classList.toggle('active',b.dataset.key===key)); renderDhikrList(container,rawAdhkarData[key]||[],key);} 
   pills.innerHTML=''; tabs.forEach(t=>{const b=document.createElement('button'); b.textContent=t.label; b.dataset.key=t.key; b.addEventListener('click',()=>activate(t.key)); pills.appendChild(b);}); activate('morning');
 }
+
+// دالة جلب الفائدة الذكية (الإنترنت أولاً، ثم المخزون)
+async function loadDailyBenefit() {
+  const fallback = [
+    "من لزم الاستغفار جعل الله له من كل هم فرجاً، ومن كل ضيق مخرجاً.",
+    "صلاة الضحى تعدل صدقة عن كل مفصل من مفاصل جسمك (360 مفصلاً).",
+    "أحب الأعمال إلى الله أدومها وإن قل، فقليل دائم خير من كثير منقطع.",
+    "كلمتان خفيفتان على اللسان ثقيلتان في الميزان: سبحان الله وبحمده، سبحان الله العظيم."
+  ];
+  let benefits = fallback;
+  try {
+    const res = await fetch('./data/benefits.json');
+    if(res.ok) {
+       benefits = await res.json();
+       LS('cached_benefits', JSON.stringify(benefits));
+    } else throw new Error();
+  } catch(e) {
+    const cached = LS('cached_benefits');
+    if(cached) benefits = JSON.parse(cached);
+  }
+  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+  const todayBenefit = benefits[dayOfYear % benefits.length];
+  const container = qs('#dailyBenefitContent');
+  if(container) container.textContent = todayBenefit;
+}
+
 async function loadResources(){const data = await fetchJSON('./data/resources.json', {useful:[]}); const host=qs('#usefulLinks'); if(!host) return; host.innerHTML=''; (data.useful||[]).forEach(g=>{const sec=document.createElement('div'); sec.className='pager-card'; sec.innerHTML=`<h3 class="section-title">${g.group}</h3>`; const ul=document.createElement('ul'); ul.className='custom-list'; (g.items||[]).forEach(it=>{const li=document.createElement('li'); li.innerHTML=`<a href="${it.url}" target="_blank" rel="noopener">${it.title}</a> <span class="small" style="display:block; margin-top:4px;">${it.desc||''}</span>`; ul.appendChild(li);}); sec.appendChild(ul); host.appendChild(sec);});}
 async function loadLearning(){const data = await fetchJSON('./data/learning.json', {plan:[], collections:[], reminders:[]}); const plan=qs('#learnPlan'), col=qs('#learnCollections'), rem=qs('#learnReminders'); if(plan){plan.innerHTML=''; (data.plan||[]).forEach(it=>{const d=document.createElement('div'); d.className='pager-card'; d.innerHTML=`<b style="font-size:1.4rem; color:var(--accent); display:block; margin-bottom:8px;">${it.title}</b><div style="font-size:1.3rem; line-height:1.8;">${it.tip}</div>`; plan.appendChild(d);});} if(col){col.innerHTML=''; (data.collections||[]).forEach(it=>{const li=document.createElement('li'); li.innerHTML=`<a href="${it.url}" target="_blank" rel="noopener">${it.title}</a>`; col.appendChild(li);});} if(rem){rem.innerHTML=''; (data.reminders||[]).forEach(t=>{const li=document.createElement('li'); li.textContent=t; rem.appendChild(li);});}}
 function showUpdateBar(reg){const bar=qs('#updateBar'); if(!bar) return; bar.style.display='flex'; qs('#updateNow')?.addEventListener('click',()=>{if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});},{once:true}); qs('#updateLater')?.addEventListener('click',()=>{bar.style.display='none';},{once:true});}
