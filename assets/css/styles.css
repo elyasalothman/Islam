@@ -103,9 +103,35 @@ main{max-width:1400px;margin:0 auto;padding:12px;display:grid;gap:12px}
 .btn.secondary{background:var(--bg2);color:var(--fg);border:1px solid var(--border)}
 .btn.danger{background:var(--danger);color:#fff;}
 
-.pills{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
-.pills button{border:1px solid var(--border);background:var(--bg2);color:var(--fg);border-radius:6px;padding:8px 12px;min-height:40px;font-family:'Amiri',serif;cursor:pointer}
-.pills button.active{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+/* تصميم أزرار الأقسام (4 فوق و 4 تحت) */
+.pills {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 8px 0 16px;
+}
+.pills button {
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--fg);
+  border-radius: 6px;
+  padding: 8px 2px;
+  min-height: 46px;
+  font-family: 'Amiri', serif;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.2;
+}
+.pills button.active {
+  background: var(--accent2);
+  color: #fff;
+  border-color: var(--accent2);
+}
+@media (max-width: 420px) {
+  .pills button { font-size: 0.8rem; padding: 4px 1px; min-height: 42px; }
+}
 
 .pager-wrap{display:grid;gap:12px;max-width:780px;margin:0 auto}
 .pager-card{padding:20px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);}
