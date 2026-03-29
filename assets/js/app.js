@@ -1,4 +1,4 @@
-// Rafiq Muslim v0.5.0 - Bulletproof Version
+// Rafiq Muslim v0.5.1 - Config Relocated
 const API_BASE='https://api.aladhan.com/v1';
 const KAABA={lat:21.4225,lon:39.8262};
 const BDC_REVERSE='https://api-bdc.net/data/reverse-geocode-client';
@@ -17,7 +17,6 @@ function dateToApi(d){return String(d.getDate()).padStart(2,'0')+'-'+String(d.ge
 function toRad(x){return x*Math.PI/180} function toDeg(x){return x*180/Math.PI} function normalize360(x){x%=360; if(x<0)x+=360; return x}
 function formatTime12h(d){try{return new Intl.DateTimeFormat('ar',{hour:'numeric',minute:'2-digit',hour12:true}).format(d)}catch(e){let h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0');const suf=h>=12?'م':'ص';h=h%12||12;return `${h}:${m} ${suf}`;}}
 
-// دالة جلب آمنة تماماً
 async function fetchJSON(url, defaultData) {
     try {
         const res = await fetch(url);
