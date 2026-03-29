@@ -1,4 +1,4 @@
-// Rafiq Muslim v0.2.9
+// Rafiq Muslim v0.3.0
 const API_BASE='https://api.aladhan.com/v1';
 const KAABA={lat:21.4225,lon:39.8262};
 const BDC_REVERSE='https://api-bdc.net/data/reverse-geocode-client';
@@ -16,7 +16,6 @@ function computeDuha(s,d){return {start:new Date(isoToDate(s).getTime()+CFG.duha
 function computeLastThird(m,f){const magh=isoToDate(m), fajr=isoToDate(f); let night=fajr-magh; if(night<=0) night+=86400000; const third=night/3; return {start:new Date(fajr.getTime()-third), end:fajr}}
 function bearing(lat1,lon1,lat2,lon2){const φ1=toRad(lat1),φ2=toRad(lat2),λ1=toRad(lon1),λ2=toRad(lon2); const y=Math.sin(λ2-λ1)*Math.cos(φ2),x=Math.cos(φ1)*Math.sin(φ2)-Math.sin(φ1)*Math.cos(φ2)*Math.cos(λ2-λ1); return normalize360(toDeg(Math.atan2(y,x)));}
 
-// دالة جلب المواقيت مع إمكانية تحديد طريقة الحساب (Method)
 async function fetchTimingsByCoords(date,lat,lon, methodOverride){
   const m = methodOverride || CFG.calculation.method;
   const ds=dateToApi(date); 
@@ -122,7 +121,6 @@ async function loadPrayerTimes(forceCity=false){
       if(el) el.textContent = formatTime12h(isoToDate(T[k]));
     }); 
     
-    // استخراج العشاء الحقيقي الفلكي من الطلب الثاني (رابطة العالم الإسلامي)
     const trueIshaTime = isoToDate(T_True.Isha);
     const elTrueIsha = qs('#t_isha_true_s');
     if(elTrueIsha) elTrueIsha.textContent = formatTime12h(trueIshaTime);
@@ -130,8 +128,6 @@ async function loadPrayerTimes(forceCity=false){
     setText('t_fajr_e', formatTime12h(isoToDate(T.Sunrise)));
     setText('t_dhuhr_e', formatTime12h(isoToDate(T.Asr)));
     setText('t_asr_e', formatTime12h(isoToDate(T.Maghrib)));
-    
-    // خروج المغرب الآن مرتبط رياضياً بالميل الفلكي 100%
     setText('t_maghrib_e', formatTime12h(trueIshaTime));
     setText('t_isha_e', formatTime12h(isoToDate(T.Midnight)));
 
@@ -156,10 +152,8 @@ async function loadPrayerTimes(forceCity=false){
       setText('ptMeta', `دقة الموقع: ${accText}`);
       const rg=reverseGeocodeCity(lat,lon).catch(()=>null); 
       
-      // جلب المواقيت الرسمية (أم القرى)
       const td=await fetchTimingsByCoords(today,lat,lon); 
       const td2=await fetchTimingsByCoords(tomorrow,lat,lon); 
-      // جلب المواقيت الفلكية (رابطة العالم الإسلامي - Method 3) لمعرفة الشفق الأحمر بالضبط
       const tdTrue=await fetchTimingsByCoords(today,lat,lon, 3); 
 
       const city=await rg; updateCityKPI(city&&city.city?city.city:'موقعي'); setQiblaFromCoords(lat,lon);
