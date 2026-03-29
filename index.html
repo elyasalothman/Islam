@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1a1410"/>
   <link rel="manifest" href="./manifest.webmanifest"/>
   <link rel="icon" href="./assets/img/icon-192.png"/>
-  <link rel="stylesheet" href="./assets/css/styles.css?v=0.4.0"/>
+  <link rel="stylesheet" href="./assets/css/styles.css?v=0.4.1"/>
   <title>رفيق المسلم</title>
 </head>
 <body>
@@ -17,9 +17,9 @@
       <div style="display: flex; gap: 8px; margin-left: 10px;">
         <button class="color-dot" data-val="white" style="background-color: #f8f9fa;" title="أبيض"></button>
         <button class="color-dot" data-val="black" style="background-color: #141414;" title="أسود"></button>
-        <button class="color-dot" data-val="brown" style="background-color: #8b5e34;" title="كلاسيكي"></button>
+        <button class="color-dot" data-val="brown" style="background-color: #c5a059;" title="كلاسيكي ذهبي"></button>
         <button class="color-dot" data-val="gray" style="background-color: #70757a;" title="رصاصي"></button>
-        <button class="color-dot" data-val="colorful" style="background: linear-gradient(45deg, #e83e8c, #6f42c1);" title="ملون"></button>
+        <button class="color-dot" data-val="colorful" style="background: linear-gradient(45deg, #06b6d4, #8b5cf6);" title="زجاجي ملون"></button>
       </div>
       <button id="toggleTashkeel" title="إخفاء/إظهار التشكيل" class="tool-btn">بَ/ب</button>
       <button id="btnTextInc" title="تكبير الخط" class="tool-btn">A+</button>
@@ -73,84 +73,4 @@
             <tr class="minor" id="tr_Duha"><th>الضحى</th><td id="t_duha_s" style="text-align: center;">—</td><td id="t_duha_e" style="text-align: center;">—</td></tr>
             <tr id="tr_Dhuhr"><th>الظهر</th><td id="t_dhuhr_s" style="text-align: center;">—</td><td id="t_dhuhr_e" style="text-align: center;">—</td></tr>
             <tr id="tr_Asr"><th>العصر</th><td id="t_asr_s" style="text-align: center;">—</td><td id="t_asr_e" style="text-align: center;">—</td></tr>
-            <tr id="tr_Maghrib"><th>المغرب</th><td id="t_maghrib_s" style="text-align: center;">—</td><td id="t_maghrib_e" style="text-align: center;">—</td></tr>
-            <tr id="tr_Isha"><th>العشاء</th>
-              <td style="text-align: center;">
-                <div id="t_isha_s">—</div>
-                <div style="margin-top: 4px;">فعلي: <span id="t_isha_true_s">—</span></div>
-              </td>
-              <td id="t_isha_e" style="text-align: center;">—</td>
-            </tr>
-            <tr class="minor" id="tr_Lastthird"><th>الثلث الأخير</th><td id="t_lastthird_s" style="text-align: center;">—</td><td id="t_lastthird_e" style="text-align: center;">—</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section id="qibla" class="section">
-      <p>زاوية القبلة (من الشمال الحقيقي): <b id="qiblaDeg">—</b></p>
-      <div class="compass">
-        <div class="dial"></div>
-        <div id="needle" class="needle"></div>
-      </div>
-      <div class="row">
-        <button class="btn" id="enableCompass">تفعيل البوصلة</button>
-        <span class="small" id="compassStatus"></span>
-      </div>
-      <div class="small" id="compassAccuracy"></div>
-    </section>
-
-    <section id="adhkar" class="section">
-      <div id="adhkarPills" class="pills"></div>
-      <div class="progress" style="margin-bottom: 16px; height: 12px; border-radius: 6px;"><div id="globalAdhkarProgress" style="width:0; background:var(--accent);"></div></div>
-      <div id="adhkarContainer"></div>
-    </section>
-
-    <section id="tasbeeh" class="section">
-      <div class="tasbeeh-wrap">
-        <div class="tasbeeh-meta">
-          <select id="tasbeehPhraseSelect" aria-label="اختيار التسبيح"></select>
-          <button class="btn secondary" id="tasbeehNext">التالي</button>
-        </div>
-        <div class="current-tasbeeh" id="currentTasbeeh">سُبْحَانَ اللَّهِ</div>
-        <div class="tasbeeh-kpi">
-          <div class="card" style="padding:16px"><div class="kpi"><div class="label">العدّاد</div><div class="tasbeeh-counter" id="tasbeehCount">0</div></div></div>
-          <div class="card" style="padding:16px"><div class="kpi"><div class="label">الهدف</div><div class="tasbeeh-target" id="tasbeehTarget">الهدف: 33</div></div></div>
-        </div>
-        <div class="tasbeeh-main-btn-wrap"><button class="tasbeeh-btn" id="tasbeehBtn">سَبِّح الآن</button></div>
-        <div class="tasbeeh-secondary-row"><button class="btn danger tasbeeh-reset-small" id="tasbeehReset">تصفير</button></div>
-      </div>
-    </section>
-
-    <section id="learning" class="section">
-      <h3>خطط مختصرة</h3><div id="learnPlan"></div>
-      <h3>مختارات علمية</h3><ul id="learnCollections"></ul>
-      <h3>تذكيرات</h3><ul id="learnReminders"></ul>
-    </section>
-
-    <section id="resources" class="section">
-      <div id="usefulLinks"></div>
-      <div class="version-info" style="text-align: center; padding: 40px 10px; color: var(--muted); font-size: 1.1rem; font-family: Arial, sans-serif;">
-        الإصدار 0.4.0
-      </div>
-    </section>
-  </div>
-</main>
-
-<div id="updateBar">
-  <div class="msg">تحديث جديد متوفر</div>
-  <div class="row" style="margin:0"><button class="btn" id="updateNow">تحديث الآن</button><button class="btn secondary" id="updateLater">لاحقًا</button></div>
-</div>
-
-<nav class="bottom-nav">
-  <button class="active" data-target="times" title="أوقات الصلاة">🕌</button>
-  <button data-target="qibla" title="القبلة">🧭</button>
-  <button data-target="adhkar" title="الأذكار">🤲</button>
-  <button data-target="tasbeeh" title="تسبيح">📿</button>
-  <button data-target="learning" title="تعلم">📚</button>
-  <button data-target="resources" title="روابط">🔗</button>
-</nav>
-
-<script src="./assets/js/app.js?v=0.4.0" type="module"></script>
-</body>
-</html>
+            <tr id="tr_Maghrib"><th>المغرب</th><td id="t_maghrib_s" style="text-align: center;">—</td><td id="t
