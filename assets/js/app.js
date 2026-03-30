@@ -137,16 +137,15 @@ async function loadPrayerTimes(forceCity = false) {
     const today = new Date(), tomorrow = new Date(Date.now() + 86400000);
     const c = LS('cityFallback') ? JSON.parse(LS('cityFallback')) : CFG.defaultCity;
 
-    const renderTimes = (T, TT, T_True) => {
-        ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].forEach(k => { const el = qs('#t_' + k.toLowerCase() + '_s'); if (el) el.textContent = formatTime12h(isoToDate(T[k])); });
-        const elTrueIsha = qs('#t_isha_true_s'); if (elTrueIsha) elTrueIsha.textContent = formatTime12h(isoToDate(T_True.Isha));
-        setText('t_fajr_e', formatTime12h(isoToDate(T.Sunrise))); setText('t_dhuhr_e', formatTime12h(isoToDate(T.Asr)));
-        setText('t_asr_e', formatTime12h(isoToDate(T.Maghrib))); setText('t_maghrib_e', formatTime12h(isoToDate(T_True.Isha))); setText('t_isha_e', formatTime12h(isoToDate(T.Midnight)));
-        const duha = computeDuha(T.Sunrise, T.Dhuhr); setText('t_duha_s', formatTime12h(duha.start)); setText('t_duha_e', formatTime12h(duha.end));
-        const last = computeLastThird(T.Maghrib, TT.Fajr); setText('t_lastthird_s', formatTime12h(last.start)); setText('t_lastthird_e', formatTime12h(last.end));
-        renderNextPrayer(T, TT.Fajr);
-        setText('ptStatus', ''); // مسح رسالة التحميل
-    };
+const renderTimes = (T, TT, T_True) => {
+    // ... الكود الموجود لديك ...
+    
+    // الحل: مسح النص وإخفاء اللون الأحمر تماماً
+    const ptStatus = qs('#ptStatus');
+    ptStatus.textContent = '';
+    ptStatus.className = 'small'; // إزالة كلاس location-error
+    ptStatus.style.display = 'none'; // إخفاء العنصر تماماً
+};
 
     try {
         if (!forceCity && 'geolocation' in navigator) {
@@ -166,10 +165,13 @@ async function loadPrayerTimes(forceCity = false) {
         } else {
             throw new Error('Fallback to City');
         }
-    } catch (e) {
-        qs('#locationControls').style.display = 'flex'; setText('cityDisplay', c.label || c.city);
-        if(!forceCity) { ptStatus.className = 'small location-error'; setText('ptStatus', 'تعذر تحديد الموقع، جاري عرض توقيت المدينة المحددة.'); }
-        
+  } catch (e) {
+    const ptStatus = qs('#ptStatus');
+    ptStatus.style.display = 'block'; // إظهار العنصر عند الخطأ
+    ptStatus.className = 'small location-error';
+    setText('ptStatus', 'تعذر تحديد الموقع الدقيق، جاري عرض توقيت المدينة.');
+    // ...
+}
         // استخدام التخزين المؤقت للمدن
         const u1 = `${API_BASE}/timingsByCity/${dateToApi(today)}?city=${encodeURIComponent(c.city)}&country=${encodeURIComponent(c.country)}&method=${CFG.calculation.method}&school=${CFG.calculation.school}&iso8601=true`;
         const u2 = `${API_BASE}/timingsByCity/${dateToApi(tomorrow)}?city=${encodeURIComponent(c.city)}&country=${encodeURIComponent(c.country)}&method=${CFG.calculation.method}&school=${CFG.calculation.school}&iso8601=true`;
