@@ -83,7 +83,7 @@ function initUI() {
 
 // استدعاء الدالة داخل init
 // أضف setupTrueIshaToggle() داخل دالة init() الأصلية في الأسفل
-}
+
 
 // تعديل الدالة لإخفاء وإظهار البطاقة العلوية
 function showSection(id){
