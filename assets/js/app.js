@@ -65,9 +65,36 @@ function initUI() {
   let hijriAdj = parseInt(LS('hijriAdj')) || 0; const hSel = qs('#hijriAdjSelect');
   if(hSel){ hSel.value = String(hijriAdj); hSel.addEventListener('change', (e) => { LS('hijriAdj', parseInt(e.target.value)); renderHijri(); }); }
   applyFontSize();
+
+
+  const updateUI = () => {
+    if(container) container.style.display = isVisible ? 'block' : 'none';
+    if(btn) btn.textContent = isVisible ? 'إخفاء العشاء الفعلي' : 'إظهار العشاء الفعلي';
+    LS('showTrueIsha', isVisible);
+  };
+
+  btn?.addEventListener('click', () => {
+    isVisible = !isVisible;
+    updateUI();
+  });
+
+  updateUI(); // التشغيل عند التحميل
 }
 
-function showSection(id){qsa('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.target===id)); qsa('.section').forEach(s=>s.classList.toggle('active',s.id===id));}
+// استدعاء الدالة داخل init
+// أضف setupTrueIshaToggle() داخل دالة init() الأصلية في الأسفل
+}
+
+// تعديل الدالة لإخفاء وإظهار البطاقة العلوية
+function showSection(id){
+  qsa('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.target===id)); 
+  qsa('.section').forEach(s=>s.classList.toggle('active',s.id===id));
+  
+  const topCard = document.getElementById('topKpiCard');
+  if(topCard) {
+    topCard.style.display = (id === 'times') ? 'block' : 'none';
+  }
+}
 function initNav(){
   qsa('.bottom-nav button').forEach(btn=>btn.addEventListener('click',async()=>{
     const id=btn.dataset.target; showSection(id); 
@@ -77,7 +104,6 @@ function initNav(){
     window.scrollTo({top:0,behavior:'smooth'});
   }));
 }
-
 function initCityList(){
   const cities=[{label:'الرياض',city:'Riyadh',country:'SA'},{label:'مكة المكرمة',city:'Makkah',country:'SA'},{label:'المدينة المنورة',city:'Al Madinah al Munawwarah',country:'SA'},{label:'جدة',city:'Jeddah',country:'SA'},{label:'الدمام',city:'Dammam',country:'SA'},{label:'الطائف',city:'Taif',country:'SA'},{label:'أبها',city:'Abha',country:'SA'},{label:'تبوك',city:'Tabuk',country:'SA'}]; 
   const sel=qs('#citySelect'); if(!sel) return; 
@@ -216,7 +242,31 @@ function renderPager(container,list,keyPrefix){
   LS(`pager:${keyPrefix}:time`, String(Date.now()));
   const host=document.createElement('div'); host.className='pager-wrap'; const indexEl=document.createElement('div'); indexEl.className='pager-index'; const card=document.createElement('div'); card.className='pager-card'; const controls=document.createElement('div'); controls.className='pager-controls'; const prev=document.createElement('button'); prev.className='btn secondary'; prev.textContent='السابق'; const next=document.createElement('button'); next.className='btn'; next.textContent='التالي'; 
   controls.append(prev,next); host.append(indexEl,card,controls); container.appendChild(host); 
+  function setupTrueIshaToggle() {
+  const btn = qs('#btnToggleTrueIsha');
+  const container = qs('#trueIshaContainer');
+  const adhanLabel = qs('#ishaAdhanLabel');
   
+  const updateUI = () => {
+    const isVisible = LS('showTrueIsha') === 'true';
+    if(container) container.style.display = isVisible ? 'block' : 'none';
+    if(adhanLabel) adhanLabel.style.display = isVisible ? 'inline' : 'none';
+    if(btn) {
+      btn.textContent = isVisible ? 'إخفاء العشاء الفعلي' : 'إظهار العشاء الفعلي';
+      // اختيارياً: تغيير شكل الزر إذا كان نشطاً
+      btn.style.borderColor = isVisible ? 'var(--accent)' : 'var(--border)';
+    }
+  };
+
+  btn?.addEventListener('click', () => {
+    const currentState = LS('showTrueIsha') === 'true';
+    LS('showTrueIsha', String(!currentState));
+    updateUI();
+    haptic(10); // اهتزاز خفيف عند الضغط
+  });
+
+  updateUI();
+}
   function update(){
     const it=list[index]; if(!it) return; const max=it.repeat; const numeric=typeof max==='number'; const repeatedOnce=numeric&&max===1; 
     const k=`dhikr:${keyPrefix}:${index}:${dayKey()}`; let rem=LS(k); rem=rem==null?(numeric?max:0):parseInt(rem,10); if(!numeric) rem=0; 
@@ -336,5 +386,9 @@ async function init(){
   const fallbackConfig = { calculation: { method: 4, school: 0 }, duha: { startOffsetAfterSunriseMin: 15, endOffsetBeforeDhuhrMin: 10 }, defaultCity: { label: 'مكة المكرمة', city: 'Makkah', country: 'SA' } };
   CFG = await fetchJSON('./assets/js/config.json', fallbackConfig); 
   initScheme(); initUI(); initNav(); initCityList(); renderHijri(); loadStoredQibla(); setupCompass(); setupTasbeeh(); qs('#useLocation')?.addEventListener('click',()=>loadPrayerTimes(false)); await loadPrayerTimes(false); await registerSW();
+setupTrueIshaToggle(); // <--- أضف هذا السطر هنا ليتم تفعيل الزر
+  
+  qs('#useLocation')?.addEventListener('click',()=>loadPrayerTimes(false)); await loadPrayerTimes(false); await registerSW();
+
 }
 window.addEventListener('load',init);
