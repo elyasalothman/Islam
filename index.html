@@ -23,10 +23,10 @@
   <div class="card">
     <div class="grid">
       <div class="kpi">
-        <div class="label">التاريخ الهجري</div>
+        <div class="label">التاريخ</div>
         <div class="value secondary" id="hijri">—</div>
-        <div id="fastingReminder" class="small" style="color: var(--accent); font-weight: bold; margin-top: 6px;"></div>
-      </div>
+  <div id="fastingReminder" class="small" style="color: var(--accent); font-weight: bold; margin-top: 6px;"></div>
+</div>
       <div class="kpi"><div class="label">الصلاة القادمة</div><div class="value"><span id="nextPrayerName">—</span> <span>(</span><span id="nextPrayerTime">—</span><span>)</span></div><div id="nextCountdown" style="direction: ltr;" class="pulse-text">—</div></div>
       <div class="kpi"><div class="label">المدينة</div><div class="value" id="cityDisplay">—</div><div class="small" id="ptMeta"></div></div>
     </div>
@@ -55,10 +55,14 @@
             <tr id="tr_Dhuhr"><th>الظهر</th><td id="t_dhuhr_s" style="text-align: center;">—</td><td id="t_dhuhr_e" style="text-align: center;">—</td></tr>
             <tr id="tr_Asr"><th>العصر</th><td id="t_asr_s" style="text-align: center;">—</td><td id="t_asr_e" style="text-align: center;">—</td></tr>
             <tr id="tr_Maghrib"><th>المغرب</th><td id="t_maghrib_s" style="text-align: center;">—</td><td id="t_maghrib_e" style="text-align: center;">—</td></tr>
-            <tr id="tr_Isha"><th>العشاء</th>
-              <td style="text-align: center;"><span id="t_isha_s">—</span><span style="margin: 0 6px;">|</span>فعلي: <span id="t_isha_true_s">—</span></td>
-              <td id="t_isha_e" style="text-align: center;">—</td>
-            </tr>
+           <tr id="tr_Isha">
+  <th>العشاء</th>
+  <td style="text-align: center;">
+    <span id="t_isha_s" style="font-size: 1.4rem;">—</span> <span style="font-size: 1rem; color: var(--muted);">(الأذان)</span>
+    <div style="text-align: right; padding-right: 15px; margin-top: 4px; font-size: 1.1rem; color: var(--muted);">الفعلي: <span id="t_isha_true_s">—</span></div>
+  </td>
+  <td id="t_isha_e" style="text-align: center; vertical-align: middle;">—</td>
+</tr>
             <tr class="minor" id="tr_Lastthird"><th>الثلث الأخير</th><td id="t_lastthird_s" style="text-align: center;">—</td><td id="t_lastthird_e" style="text-align: center;">—</td></tr>
           </tbody>
         </table>
@@ -72,7 +76,7 @@
         <div id="needle" class="needle"></div>
       </div>
       <div class="row" style="justify-content: center; margin-top: 20px;">
-        <button class="btn" id="enableCompass" style="font-size: 1.4rem;">تفعيل البوصلة الذكية 🧭</button>
+        <button class="btn" id="enableCompass" style="font-size: 1.4rem;">اتجاة الفبلة</button>
       </div>
       <div class="small" id="compassStatus" style="text-align: center; margin-top: 10px;"></div>
       <div class="small" id="compassAccuracy" style="text-align: center;"></div>
@@ -117,7 +121,7 @@
   <h3 class="section-title">القرآن الكريم</h3>
   
   <div id="quranReader" style="display:none;">
-    <button class="btn secondary" id="backToSurahs" style="margin-bottom: 15px;">🔙 العودة للقائمة</button>
+<button id="backToSurahs" style="font-size: 2.2rem; background: transparent; border: none; cursor: pointer; margin-bottom: 10px;">🔙</button>
     <div id="surahTitle" style="text-align:center; font-size: 2rem; color: var(--accent); font-weight:bold; margin-bottom: 20px;"></div>
     <div id="quranText" style="font-size: 2.2rem; line-height: 2.5; text-align: justify; font-family: 'Amiri', serif;"></div>
   </div>
