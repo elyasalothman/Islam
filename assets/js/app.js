@@ -1,4 +1,4 @@
-// Rafiq Muslim v0.6.2 - النسخة المصححة
+// Rafiq Muslim v0.6.3 - النسخة المحدثة
 const API_BASE='https://api.aladhan.com/v1';
 const KAABA={lat:21.4225,lon:39.8262};
 const BDC_REVERSE='https://api-bdc.net/data/reverse-geocode-client';
@@ -394,48 +394,31 @@ async function loadSurahList() {
   }
 }
 
-// فتح السورة
+// تحديث دالة فتح السورة (حذف مرجع liveBroadcast)
 async function openSurah(num, name) {
-  document.getElementById('surahList').style.display = 'none';
-  document.getElementById('liveBroadcast').style.display = 'none';
+  const list = document.getElementById('surahList');
+  if(list) list.style.display = 'none';
+  
   const reader = document.getElementById('quranReader');
-  reader.style.display = 'block';
-  document.getElementById('surahTitle').textContent = name;
+  if(reader) reader.style.display = 'block';
+  
+  setText('surahTitle', name);
   try {
     const res = await fetch(`https://api.alquran.cloud/v1/surah/${num}/quran-uthmani`);
     const data = await res.json();
     let html = '';
     data.data.ayahs.forEach(a => { html += `<span class="ayah-text">${a.text}</span><span class="ayah-number">${a.numberInSurah}</span> `; });
-    document.getElementById('quranText').innerHTML = html;
+    const textEl = document.getElementById('quranText');
+    if(textEl) textEl.innerHTML = html;
     window.scrollTo({top: 0, behavior: 'smooth'});
-  } catch (e) { document.getElementById('quranText').textContent = "خطأ في التحميل"; }
+  } catch (e) { setText('quranText', "خطأ في التحميل"); }
 }
 
-// التبديل بين الواجهات
-function toggleQuranView(view) {
-  const list = document.getElementById('surahList');
-  const live = document.getElementById('liveBroadcast');
-  const reader = document.getElementById('quranReader');
-  const buttons = document.querySelectorAll('#quranTabs button');
-  const radio = document.getElementById('quranRadio');
+// تحديث زر الرجوع في صفحة القرآن
+qs('#backToSurahs')?.addEventListener('click', () => {
+  qs('#quranReader').style.display = 'none';
+  qs('#surahList').style.display = 'grid';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+});
 
-  buttons.forEach(btn => {
-    btn.classList.toggle('active', (view === 'list' && btn.innerText.includes('قائمة')) || (view === 'live' && btn.innerText.includes('البث')));
-  });
-
-  if (view === 'list') {
-    list.style.display = 'grid';
-    live.style.display = 'none';
-    reader.style.display = 'none';
-    if(radio) radio.pause(); 
-  } else {
-    list.style.display = 'none';
-    live.style.display = 'block';
-    reader.style.display = 'none';
-  }
-}
-
-// ربط الدوال بالـ HTML
-window.toggleQuranView = toggleQuranView;
-window.loadSurahList = loadSurahList;
-window.openSurah = openSurah;
+// يمكنك حذف دالة toggleQuranView بالكامل لأنها لم تعد مطلوبة
