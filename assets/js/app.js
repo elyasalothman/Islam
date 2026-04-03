@@ -22,7 +22,6 @@ async function fetchJSON(url, defaultData) {
     catch(e) { return defaultData; }
 }
 
-// دالة التحكم في وقت العشاء الفعلي
 function setupTrueIshaToggle() {
   const btn = qs('#btnToggleTrueIsha');
   const container = qs('#trueIshaContainer');
@@ -30,8 +29,10 @@ function setupTrueIshaToggle() {
   
   const updateUI = () => {
     const isVisible = LS('showTrueIsha') === 'true';
-    if(container) container.style.display = isVisible ? 'block' : 'none';
+    // إظهار أو إخفاء الحاويات الجديدة
+    if(container) container.style.display = isVisible ? 'flex' : 'none';
     if(adhanLabel) adhanLabel.style.display = isVisible ? 'inline' : 'none';
+    
     if(btn) {
       btn.textContent = isVisible ? 'إخفاء العشاء الفعلي' : 'إظهار العشاء الفعلي';
       btn.style.borderColor = isVisible ? 'var(--accent)' : 'var(--border)';
@@ -51,7 +52,8 @@ function setupTrueIshaToggle() {
 function renderHijri(){
   try{
     const d = new Date(); const adj = parseInt(LS('hijriAdj')) || 0; d.setDate(d.getDate() + adj);
-    const f=new Intl.DateTimeFormat('ar-SA-u-ca-islamic',{day:'numeric',month:'long',year:'numeric'}); setText('hijri',f.format(d));
+    const f=new Intl.DateTimeFormat('ar-SA-u-ca-islamic',{weekday: 'long', day:'numeric',month:'long',year:'numeric'}); 
+    setText('hijri',f.format(d));
     const parts = f.formatToParts(d); const dayNum = parseInt(parts.find(p => p.type === 'day')?.value); const weekday = d.getDay();
     let msg = '';
     if (dayNum === 12 || dayNum === 13 || dayNum === 14) msg = 'غداً من الأيام البيض، تذكير بالصيام 🌙';
@@ -93,23 +95,40 @@ function initUI() {
   applyFontSize();
 }
 
-function showSection(id){
-  qsa('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.target===id)); 
-  qsa('.section').forEach(s=>s.classList.toggle('active',s.id===id));
+// تحديث دالة showSection لتصبح عالمية وتدعم تحميل البيانات
+async function showSection(id) {
+  // 1. تحديث أزرار القائمة السفلية
+  qsa('.bottom-nav button').forEach(b => b.classList.toggle('active', b.dataset.target === id));
+  
+  // 2. تحديث الأقسام الظاهرة
+  qsa('.section').forEach(s => s.classList.toggle('active', s.id === id));
+
+  // 3. تحميل البيانات إذا لزم الأمر (خاص بالقرآن والأذكار والتعلم)
+  if (id === 'quran' && !loaded.quran) { loaded.quran = true; loadSurahList(); }
+  if (id === 'adhkar' && !loaded.adhkar) { loaded.adhkar = true; await loadAdhkar(); }
+  if (id === 'learning' && !loaded.learning) { 
+    loaded.learning = true; 
+    await Promise.all([loadLearning(), loadResources(), loadDailyBenefit()]); 
+  }
+
+  // 4. التحكم في ظهور الشريط العلوي (يظهر فقط في أوقات الصلاة)
   const topCard = document.getElementById('topKpiCard');
-  if(topCard) {
+  if (topCard) {
     topCard.style.display = (id === 'times') ? 'block' : 'none';
   }
+
+  // 5. العودة لأعلى الصفحة بسلاسة
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function initNav(){
-  qsa('.bottom-nav button').forEach(btn=>btn.addEventListener('click',async()=>{
-    const id=btn.dataset.target; showSection(id); 
-    if(id==='quran'&&!loaded.quran){loaded.quran=true; loadSurahList();}
-    if(id==='adhkar'&&!loaded.adhkar){loaded.adhkar=true; await loadAdhkar();} 
-    if(id==='learning'&&!loaded.learning){loaded.learning=true; await Promise.all([loadLearning(), loadResources(), loadDailyBenefit()]);} 
-    window.scrollTo({top:0,behavior:'smooth'});
-  }));
+// جعل الدالة متاحة لـ HTML (خاص بنظام الـ Module)
+window.showSection = showSection;
+
+// تبسيط دالة initNav
+function initNav() {
+  qsa('.bottom-nav button').forEach(btn => {
+    btn.addEventListener('click', () => showSection(btn.dataset.target));
+  });
 }
 
 function initCityList(){
@@ -126,21 +145,51 @@ function updateCityKPIFromSelect(){const sel=qs('#citySelect'); if(sel&&sel.valu
 async function reverseGeocodeCity(lat,lon){const key=`rg:${lat.toFixed(3)},${lon.toFixed(3)}`; const cached=LS(key); if(cached) try{return JSON.parse(cached)}catch(e){} const u=`${BDC_REVERSE}?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&localityLanguage=ar`; const r=await fetch(u); const j=await r.json(); const out={city:j.city||j.locality||j.principalSubdivision||null}; LS(key,JSON.stringify(out)); return out;}
 
 function renderNextPrayer(T,fajrTomorrowISO){
-  const order=['Fajr','Dhuhr','Asr','Maghrib','Isha']; const now=new Date(); let nextName=null,time=null, currName='Isha'; 
-  for(let i=0; i<order.length; i++){const k = order[i]; const d=isoToDate(T[k]); if(d>now){nextName=k; time=d; currName = i === 0 ? 'Isha' : order[i-1]; break;}} 
-  if(!nextName){nextName='Fajr'; time=isoToDate(fajrTomorrowISO); currName='Isha';} 
-  setText('nextPrayerName',translatePrayer(nextName)); setText('nextPrayerTime',formatTime12h(time)); 
-  qsa('.table tbody tr').forEach(tr => tr.classList.remove('current-prayer'));
-  const currRow = qs('#tr_' + currName); if(currRow) currRow.classList.add('current-prayer');
+  const order=['Fajr','Dhuhr','Asr','Maghrib','Isha']; 
+  const now=new Date(); 
+  let nextName=null, time=null, currName='Isha', currTime=null; 
+
+  // البحث عن الصلاة القادمة والسابقة
+  for(let i=0; i<order.length; i++){
+    const k = order[i]; 
+    const d = isoToDate(T[k]); 
+    if(d > now){
+      nextName=k; time=d; 
+      // الصلاة الحالية هي التي تسبق القادمة في المصفوفة
+      currName = i === 0 ? 'Isha' : order[i-1];
+      currTime = i === 0 ? isoToDate(T['Isha']) : isoToDate(T[order[i-1]]); // ملاحظة: إذا كانت الفجر، نحتاج توقيت عشاء الأمس ولكن للتبسيط سنستخدم ت د
+      break;
+    }
+  } 
+
+  if(!nextName){nextName='Fajr'; time=isoToDate(fajrTomorrowISO); currName='Isha'; currTime=isoToDate(T['Isha']);} 
+  
+  setText('nextPrayerName',translatePrayer(nextName)); 
+  setText('nextPrayerTime',formatTime12h(time)); 
+
   if(nextTimer) clearInterval(nextTimer); 
   nextTimer=setInterval(()=>{
-    const diff=time-new Date(); 
-    if(diff<=0){setText('nextCountdown','حان الوقت'); checkNotify(translatePrayer(nextName)); clearInterval(nextTimer); setTimeout(()=>loadPrayerTimes(), 60000); return;} 
-    const h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000); 
-    if(h > 0) setText('nextCountdown',`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
-    else setText('nextCountdown',`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
+    const nowLoop = new Date();
+    const diffNext = time - nowLoop; 
+    const diffPrev = nowLoop - currTime; // الوقت المنقضي منذ الصلاة الحالية
+    
+    // إذا مر أقل من 35 دقيقة على الصلاة الحالية (35 * 60 * 1000)
+    if(diffPrev > 0 && diffPrev < 2100000) {
+      const minsPassed = Math.floor(diffPrev / 60000);
+      setText('nextCountdown', `${translatePrayer(currName)}: منذ ${minsPassed} د`);
+    } else {
+      // العداد التنازلي المعتاد للصلاة القادمة
+      if(diffNext <= 0){
+        setText('nextCountdown','حان الوقت'); 
+        clearInterval(nextTimer); 
+        setTimeout(()=>loadPrayerTimes(), 60000); 
+        return;
+      } 
+      const h=Math.floor(diffNext/3600000), m=Math.floor((diffNext%3600000)/60000), s=Math.floor((diffNext%60000)/1000); 
+      setText('nextCountdown', h > 0 ? `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
+    }
   },1000);
-}
+} 
 
 function setQiblaFromCoords(lat,lon){const b=bearing(lat,lon,KAABA.lat,KAABA.lon); setText('qiblaDeg',`${b.toFixed(1)}°`); LS('qiblaBearing',String(b));}
 function loadStoredQibla(){const v=LS('qiblaBearing'); if(v) setText('qiblaDeg',`${parseFloat(v).toFixed(1)}°`)}

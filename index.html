@@ -38,12 +38,13 @@
         <select id="citySelect" style="flex: 1;"><option value="">— اختر مدينة يدوياً —</option></select>
       </div>
       <div class="small" id="ptStatus" style="margin-top: 6px; text-align: center;"></div>
+<h3 class="section-title" style="text-align: center; border-bottom: none; margin-bottom: 5px;">جدول مواعيد الصلاة اليومي</h3>
 
       <div class="table-wrap">
         <table class="table" style="margin-top:10px">
           <thead>
             <tr>
-              <th style="text-align: right;">الصلاة</th>
+              <th style="text-align: center; width: 25%;">الصلاة</th>
               <th style="text-align: center;">دخول</th>
               <th style="text-align: center;">خروج</th>
             </tr>
@@ -54,19 +55,21 @@
             <tr id="tr_Dhuhr"><th>الظهر</th><td id="t_dhuhr_s" style="text-align: center;">—</td><td id="t_dhuhr_e" style="text-align: center;">—</td></tr>
             <tr id="tr_Asr"><th>العصر</th><td id="t_asr_s" style="text-align: center;">—</td><td id="t_asr_e" style="text-align: center;">—</td></tr>
             <tr id="tr_Maghrib"><th>المغرب</th><td id="t_maghrib_s" style="text-align: center;">—</td><td id="t_maghrib_e" style="text-align: center;">—</td></tr>
-           <tr id="tr_Isha">
-  <th>العشاء</th>
-  <td style="text-align: center;">
-    <div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-direction: row-reverse;">
-      <span id="t_isha_s" style="font-size: 1.4rem;">—</span>
-      <span id="ishaAdhanLabel" style="font-size: 0.9rem; color: var(--muted); display: none;">(الأذان)</span>
-    </div>
-    <div id="trueIshaContainer" style="text-align: left; padding-left: 20px; margin-top: 4px; font-size: 1.1rem; color: var(--muted); display: none;">
-      الفعلي: <span id="t_isha_true_s">—</span>
-    </div>
-  </td>
-  <td id="t_isha_e" style="text-align: center; vertical-align: middle;">—</td>
-</tr>
+         <tr id="tr_Isha">
+        <th style="text-align: center;">العشاء</th>
+        <td style="text-align: center;">
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+             <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <span id="ishaAdhanLabel" class="small" style="display: none;">الأذان:</span>
+                <span id="t_isha_s" class="time-font">—</span>
+             </div>
+             <div id="trueIshaContainer" class="small" style="display: none; margin-top: 2px;">
+                الفعلي: <span id="t_isha_true_s">—</span>
+             </div>
+          </div>
+        </td>
+        <td id="t_isha_e" style="text-align: center; vertical-align: middle;" class="time-font">—</td>
+      </tr>
             <tr class="minor" id="tr_Lastthird"><th>الثلث الأخير</th><td id="t_lastthird_s" style="text-align: center;">—</td><td id="t_lastthird_e" style="text-align: center;">—</td></tr>
           </tbody>
         </table>
@@ -80,7 +83,7 @@
         <div id="needle" class="needle"></div>
       </div>
       <div class="row" style="justify-content: center; margin-top: 20px;">
-        <button class="btn" id="enableCompass" style="font-size: 1.4rem;">اتجاه الفبلة</button>
+        <button class="btn" id="enableCompass" style="font-size: 1.4rem;">اتجاه القبلة</button>
       </div>
       <div class="small" id="compassStatus" style="text-align: center; margin-top: 10px;"></div>
       <div class="small" id="compassAccuracy" style="text-align: center;"></div>
@@ -125,7 +128,7 @@
   <h3 class="section-title">القرآن الكريم</h3>
   
   <div id="quranReader" style="display:none;">
-<button id="backToSurahs" style="font-size: 2.2rem; background: transparent; border: none; cursor: pointer; margin-bottom: 10px;">🔙</button>
+<button id="backToSurahs" style="font-size: 2.5rem; background: transparent; border: none; cursor: pointer; color: var(--accent); margin-bottom: 15px; padding: 0;">&rarr;</button>
     <div id="surahTitle" style="text-align:center; font-size: 2rem; color: var(--accent); font-weight:bold; margin-bottom: 20px;"></div>
     <div id="quranText" style="font-size: 2.2rem; line-height: 2.5; text-align: justify; font-family: 'Amiri', serif;"></div>
   </div>

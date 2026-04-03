@@ -212,3 +212,30 @@ main{
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath fill='none' stroke='%23d4af37' stroke-width='1.5' d='M18 2L22.5 7L29.5 8.5L30.5 15.5L35 20.5L30.5 25.5L29.5 32.5L22.5 34L18 39L13.5 34L6.5 32.5L5.5 25.5L1 20.5L5.5 15.5L6.5 8.5L13.5 7Z'/%3E%3C/svg%3E") no-repeat center center; 
   background-size: contain; 
 }
+/* أضف هذا النمط في ملف styles.css */
+.small, .table tr.minor th, .table tr.minor td {
+  font-size: 1.1rem !important; /* حجم خط صغير وموحد */
+  color: var(--muted) !important;
+  font-weight: normal !important;
+}
+/* أضف هذه الأنماط في نهاية ملف assets/css/styles.css */
+
+/* توحيد حجم خط الأرقام في الجدول */
+.time-font {
+  font-size: 1.4rem !important;
+  font-weight: bold !important;
+  font-family: Arial, sans-serif; /* استخدام خط سليم للأرقام لضمان التساوي */
+}
+
+/* توحيد الحجم الصغير (الضحى، الثلث الأخير، دقة الموقع، وتفاصيل العشاء) */
+.small, .table tr.minor th, .table tr.minor td {
+  font-size: 1.05rem !important; 
+  color: var(--muted) !important;
+  font-weight: normal !important;
+}
+
+/* ضبط عناوين الجدول */
+.table thead th {
+  font-size: 1.2rem !important;
+  padding: 12px 5px !important;
+}
