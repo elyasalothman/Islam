@@ -129,40 +129,31 @@
   
   <div class="pills" id="quranTabs">
     <button class="active" onclick="toggleQuranView('list')">قائمة السور</button>
-    <button onclick="toggleQuranView('live')">البث المباشر</button>
+    <button onclick="toggleQuranView('live')">البث الإذاعي</button>
   </div>
 
   <div id="liveBroadcast" style="display: none;">
-    <div class="card" style="margin-bottom: 16px; padding: 15px; text-align: center;">
-      <div class="label" style="margin-bottom: 10px;">إذاعة القرآن الكريم من المملكة العربية السعودية</div>
-      <audio controls style="width: 100%;" src="https://stream.radio.gov.sa/quran"></audio>
-    </div>
-
-    <div class="grid" style="grid-template-columns: 1fr;">
-      <div class="card" style="padding: 10px;">
-        <div class="label" style="margin-bottom: 8px; text-align: center;">بث مباشر - مكة المكرمة</div>
-        <div class="video-container">
-          <iframe src="https://www.youtube.com/embed/live_stream?channel=UC8H-Z5_R-UPr1f8k0iVpXwA" frameborder="0" allowfullscreen></iframe>
-        </div>
-      </div>
-
-      <div class="card" style="padding: 10px;">
-        <div class="label" style="margin-bottom: 8px; text-align: center;">بث مباشر - المدينة المنورة</div>
-        <div class="video-container">
-          <iframe src="https://www.youtube.com/embed/live_stream?channel=UC9S9p7m7r8I6S7pYtG5pG5A" frameborder="0" allowfullscreen></iframe>
-        </div>
-      </div>
+    <div class="card" style="text-align: center; padding: 25px;">
+      <div style="font-size: 3rem; margin-bottom: 10px;">📻</div>
+      <div class="label" style="margin-bottom: 15px; font-weight: bold;">إذاعة القرآن الكريم (بث مباشر مستمر)</div>
+      
+      <audio id="quranRadio" controls style="width: 100%; border-radius: 8px;">
+        <source src="https://qurango.net/radio/saudi" type="audio/mpeg">
+        متصفحك لا يدعم تشغيل الإذاعة.
+      </audio>
+      
+      <p class="small" style="margin-top: 15px; color: var(--muted);">إذاعة القرآن الكريم من المملكة العربية السعودية</p>
     </div>
   </div>
   
   <div id="quranReader" style="display:none;">
-    <button id="backToSurahs" style="font-size: 2.5rem; background: transparent; border: none; cursor: pointer; color: var(--accent); margin-bottom: 15px; padding: 0;">&rarr;</button>
+    <button onclick="toggleQuranView('list')" style="font-size: 2.5rem; background: none; border: none; color: var(--accent); cursor: pointer;">&rarr;</button>
     <div id="surahTitle" style="text-align:center; font-size: 2rem; color: var(--accent); font-weight:bold; margin-bottom: 20px;"></div>
-    <div id="quranText" style="font-size: 2.2rem; line-height: 2.5; text-align: justify; font-family: 'Amiri', serif;"></div>
+    <div id="quranText" style="font-size: 2rem; line-height: 2.5; text-align: justify; font-family: 'Amiri', serif; padding: 10px;"></div>
   </div>
 
   <div id="surahList" class="surah-grid">
-     <div style="text-align:center; width:100%; grid-column: 1 / -1;">جاري تحميل السور...</div>
+     <div style="text-align:center; width:100%; grid-column: 1 / -1;">جاري تحميل قائمة السور...</div>
   </div>
 </section>
     <section id="settings" class="section">

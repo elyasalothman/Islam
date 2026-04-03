@@ -374,91 +374,68 @@ async function init(){
 }
 window.addEventListener('load',init);
 
-
+// تحميل قائمة السور
 async function loadSurahList() {
   try {
     const res = await fetch('https://api.alquran.cloud/v1/surah');
     const data = await res.json();
-    const container = qs('#surahList');
+    const container = document.getElementById('surahList');
     if (!container) return;
     container.innerHTML = '';
     data.data.forEach(s => {
       const el = document.createElement('div');
       el.className = 'surah-card';
-      el.innerHTML = `<div class="surah-name">${s.name}</div><div class="surah-meta">آياتها: ${s.numberOfAyahs} | ${s.revelationType === 'Meccan' ? 'مكية' : 'مدنية'}</div>`;
+      el.innerHTML = `<div class="surah-name">${s.name}</div><div class="surah-meta">آياتها: ${s.numberOfAyahs}</div>`;
       el.addEventListener('click', () => openSurah(s.number, s.name));
       container.appendChild(el);
     });
   } catch (e) {
-    if(qs('#surahList')) qs('#surahList').innerHTML = '<div style="text-align:center; grid-column: 1 / -1;">حدث خطأ في تحميل السور.</div>';
+    if(document.getElementById('surahList')) document.getElementById('surahList').innerHTML = 'حدث خطأ في تحميل السور.';
   }
 }
 
+// فتح السورة
 async function openSurah(num, name) {
-  qs('#surahList').style.display = 'none';
-  const reader = qs('#quranReader');
+  document.getElementById('surahList').style.display = 'none';
+  document.getElementById('liveBroadcast').style.display = 'none';
+  const reader = document.getElementById('quranReader');
   reader.style.display = 'block';
-  qs('#surahTitle').textContent = 'جاري التحميل...';
-  qs('#quranText').innerHTML = '';
-  
+  document.getElementById('surahTitle').textContent = name;
   try {
     const res = await fetch(`https://api.alquran.cloud/v1/surah/${num}/quran-uthmani`);
     const data = await res.json();
-    qs('#surahTitle').textContent = name;
-    
     let html = '';
-    if (num !== 1 && num !== 9) {
-      html += '<div style="text-align:center; font-size:1.8rem; margin-bottom:15px; color:var(--accent2);">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>';
-    }
-    
-    let ayahs = data.data.ayahs;
-    if(num !== 1 && num !== 9 && ayahs[0].text.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ')){
-        ayahs[0].text = ayahs[0].text.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ', '');
-    }
-
-    ayahs.forEach(a => {
-      html += `<span class="ayah-text">${a.text}</span><span class="ayah-number">${a.numberInSurah}</span> `;
-    });
-    
-    qs('#quranText').innerHTML = html;
+    data.data.ayahs.forEach(a => { html += `<span class="ayah-text">${a.text}</span><span class="ayah-number">${a.numberInSurah}</span> `; });
+    document.getElementById('quranText').innerHTML = html;
     window.scrollTo({top: 0, behavior: 'smooth'});
-  } catch (e) {
-    qs('#quranText').innerHTML = '<div style="text-align:center;">حدث خطأ في تحميل الآيات.</div>';
-  }
+  } catch (e) { document.getElementById('quranText').textContent = "خطأ في التحميل"; }
 }
 
-// تفعيل زر الرجوع
-document.addEventListener('click', (e) => {
-  if (e.target && e.target.id === 'backToSurahs') {
-    qs('#quranReader').style.display = 'none';
-    qs('#surahList').style.display = 'grid';
-    window.scrollTo({top: 0, behavior: 'smooth'});
-  }
-});
-
-// دالة التبديل بين قائمة السور والبث المباشر
+// التبديل بين الواجهات
 function toggleQuranView(view) {
   const list = document.getElementById('surahList');
   const live = document.getElementById('liveBroadcast');
   const reader = document.getElementById('quranReader');
   const buttons = document.querySelectorAll('#quranTabs button');
+  const radio = document.getElementById('quranRadio');
 
-  // تحديث حالة الأزرار
   buttons.forEach(btn => {
-    btn.classList.toggle('active', (view === 'list' && btn.textContent.includes('قائمة')) || (view === 'live' && btn.textContent.includes('البث')));
+    btn.classList.toggle('active', (view === 'list' && btn.innerText.includes('قائمة')) || (view === 'live' && btn.innerText.includes('البث')));
   });
 
   if (view === 'list') {
     list.style.display = 'grid';
     live.style.display = 'none';
     reader.style.display = 'none';
+    if(radio) radio.pause(); 
   } else {
     list.style.display = 'none';
     live.style.display = 'block';
     reader.style.display = 'none';
-    haptic(10); // اهتزاز بسيط عند التبديل
   }
 }
 
-// جعل الدالة متاحة عالمياً
+// ربط الدوال بالـ HTML
 window.toggleQuranView = toggleQuranView;
+window.loadSurahList = loadSurahList;
+window.openSurah = openSurah;

@@ -259,24 +259,17 @@ main{
 }
 .back-btn { font-size: 2.5rem; background: none; border: none; color: var(--accent); cursor: pointer; }
 .reader-title { font-size: 1.4rem; font-weight: bold; color: var(--accent); }
-/* تنسيق مشغل الفيديو ليكون متجاوباً */
+/* تنسيقات قسم القرآن الكريم والبث */
+.surah-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.surah-card { background: var(--bg); border: 1px solid var(--border); padding: 16px; border-radius: var(--radius); text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: var(--card-shadow); }
+.surah-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.surah-name { font-size: 1.6rem; font-weight: bold; color: var(--accent); }
+.surah-meta { font-size: 1.1rem; color: var(--muted); margin-top: 5px; }
+
 .video-container {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9; /* يحافظ على أبعاد الفيديو */
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: #000;
+  position: relative; width: 100%; aspect-ratio: 16 / 9;
+  border-radius: var(--radius); overflow: hidden; background: #000; margin-top: 10px;
 }
+.video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-.video-container iframe {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  border: none;
-}
-
-#quranTabs {
-  margin-bottom: 20px;
-  grid-template-columns: 1fr 1fr; /* تقسيم الزرين بالتساوي */
-}
+#quranTabs { margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
