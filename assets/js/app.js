@@ -1,4 +1,4 @@
-// Rafiq Muslim v0.6.2 - Scrolling re-enabled & Layout fix
+// Rafiq Muslim v0.6.2 - النسخة المصححة
 const API_BASE='https://api.aladhan.com/v1';
 const KAABA={lat:21.4225,lon:39.8262};
 const BDC_REVERSE='https://api-bdc.net/data/reverse-geocode-client';
@@ -20,6 +20,32 @@ function formatTime12h(d){try{return new Intl.DateTimeFormat('ar',{hour:'numeric
 async function fetchJSON(url, defaultData) {
     try { const res = await fetch(url); if (!res.ok) throw new Error(); return await res.json(); } 
     catch(e) { return defaultData; }
+}
+
+// دالة التحكم في وقت العشاء الفعلي
+function setupTrueIshaToggle() {
+  const btn = qs('#btnToggleTrueIsha');
+  const container = qs('#trueIshaContainer');
+  const adhanLabel = qs('#ishaAdhanLabel');
+  
+  const updateUI = () => {
+    const isVisible = LS('showTrueIsha') === 'true';
+    if(container) container.style.display = isVisible ? 'block' : 'none';
+    if(adhanLabel) adhanLabel.style.display = isVisible ? 'inline' : 'none';
+    if(btn) {
+      btn.textContent = isVisible ? 'إخفاء العشاء الفعلي' : 'إظهار العشاء الفعلي';
+      btn.style.borderColor = isVisible ? 'var(--accent)' : 'var(--border)';
+    }
+  };
+
+  btn?.addEventListener('click', () => {
+    const currentState = LS('showTrueIsha') === 'true';
+    LS('showTrueIsha', String(!currentState));
+    updateUI();
+    haptic(10);
+  });
+
+  updateUI();
 }
 
 function renderHijri(){
@@ -65,36 +91,17 @@ function initUI() {
   let hijriAdj = parseInt(LS('hijriAdj')) || 0; const hSel = qs('#hijriAdjSelect');
   if(hSel){ hSel.value = String(hijriAdj); hSel.addEventListener('change', (e) => { LS('hijriAdj', parseInt(e.target.value)); renderHijri(); }); }
   applyFontSize();
-
-
-  const updateUI = () => {
-    if(container) container.style.display = isVisible ? 'block' : 'none';
-    if(btn) btn.textContent = isVisible ? 'إخفاء العشاء الفعلي' : 'إظهار العشاء الفعلي';
-    LS('showTrueIsha', isVisible);
-  };
-
-  btn?.addEventListener('click', () => {
-    isVisible = !isVisible;
-    updateUI();
-  });
-
-  updateUI(); // التشغيل عند التحميل
 }
 
-// استدعاء الدالة داخل init
-// أضف setupTrueIshaToggle() داخل دالة init() الأصلية في الأسفل
-
-
-// تعديل الدالة لإخفاء وإظهار البطاقة العلوية
 function showSection(id){
   qsa('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.target===id)); 
   qsa('.section').forEach(s=>s.classList.toggle('active',s.id===id));
-  
   const topCard = document.getElementById('topKpiCard');
   if(topCard) {
     topCard.style.display = (id === 'times') ? 'block' : 'none';
   }
 }
+
 function initNav(){
   qsa('.bottom-nav button').forEach(btn=>btn.addEventListener('click',async()=>{
     const id=btn.dataset.target; showSection(id); 
@@ -104,6 +111,7 @@ function initNav(){
     window.scrollTo({top:0,behavior:'smooth'});
   }));
 }
+
 function initCityList(){
   const cities=[{label:'الرياض',city:'Riyadh',country:'SA'},{label:'مكة المكرمة',city:'Makkah',country:'SA'},{label:'المدينة المنورة',city:'Al Madinah al Munawwarah',country:'SA'},{label:'جدة',city:'Jeddah',country:'SA'},{label:'الدمام',city:'Dammam',country:'SA'},{label:'الطائف',city:'Taif',country:'SA'},{label:'أبها',city:'Abha',country:'SA'},{label:'تبوك',city:'Tabuk',country:'SA'}]; 
   const sel=qs('#citySelect'); if(!sel) return; 
@@ -111,6 +119,7 @@ function initCityList(){
   const saved=LS('cityFallback'); if(saved) sel.value=saved; 
   sel.addEventListener('change',()=>{LS('cityFallback',sel.value); updateCityKPIFromSelect(); loadPrayerTimes(true);}); updateCityKPIFromSelect();
 }
+
 function getCityFallback(){const v=LS('cityFallback'); if(v) try{return JSON.parse(v)}catch(e){} return CFG.defaultCity;}
 function updateCityKPI(t){setText('cityDisplay',t||'—')}
 function updateCityKPIFromSelect(){const sel=qs('#citySelect'); if(sel&&sel.value) try{const o=JSON.parse(sel.value); updateCityKPI(o.label||o.city)}catch(e){} else {const c=getCityFallback(); updateCityKPI(c.label||c.city||'—')}}
@@ -181,7 +190,6 @@ function setupCompass(){
   const needle=qs('#needle'), acc=qs('#compassAccuracy'); if(!needle) return; 
   let ema=null; function delta(a,b){return (b-a+540)%360-180} 
   function render(q,h){needle.style.transform=`translate(-50%,-100%) rotate(${normalize360(q-h)}deg)`;} 
-  
   function onOri(ev){
     let heading=null; 
     if(typeof ev.webkitCompassHeading==='number'&&ev.webkitCompassHeading>=0){
@@ -190,9 +198,7 @@ function setupCompass(){
         if(ev.webkitCompassAccuracy > 30) { 
           acc.textContent = 'يرجى تحريك الهاتف على شكل رقم 8 لمعايرة البوصلة 🔄';
           acc.style.color = 'var(--danger)';
-        } else {
-          acc.textContent = ''; 
-        }
+        } else { acc.textContent = ''; }
       }
     } else if(typeof ev.alpha==='number'){
       heading=360-ev.alpha; 
@@ -204,7 +210,6 @@ function setupCompass(){
     ema=normalize360(ema+delta(ema,heading)*0.18); 
     render(q,ema);
   }
-
   const btn=qs('#enableCompass');
   if(btn){
     btn.addEventListener('click', async ()=>{
@@ -222,8 +227,11 @@ function setupCompass(){
     });
   }
 }
+
 function haptic(ms=10){try{if(navigator.vibrate) navigator.vibrate(ms);}catch(e){}}
+
 function setupTasbeeh(){const select=qs('#tasbeehPhraseSelect'), current=qs('#currentTasbeeh'), countEl=qs('#tasbeehCount'), targetEl=qs('#tasbeehTarget'), btn=qs('#tasbeehBtn'), resetBtn=qs('#tasbeehReset'), nextBtn=qs('#tasbeehNext'); if(!select||!current||!countEl||!targetEl||!btn||!resetBtn||!nextBtn) return; select.innerHTML=''; TASBEEH_PHRASES.forEach((p,idx)=>{const o=document.createElement('option'); o.value=String(idx); o.textContent=`${p.name} — ${p.target}`; select.appendChild(o);}); let phraseIndex=parseInt(LS('tasbeehPhraseIndex')||'0',10); if(Number.isNaN(phraseIndex)||phraseIndex<0||phraseIndex>=TASBEEH_PHRASES.length) phraseIndex=0; let count=parseInt(LS('tasbeehCount')||'0',10); if(Number.isNaN(count)||count<0) count=0; function render(){const p=TASBEEH_PHRASES[phraseIndex]; select.value=String(phraseIndex); current.textContent=p.name; countEl.textContent=String(count); targetEl.textContent=`الهدف: ${p.target}`;} function save(){LS('tasbeehPhraseIndex',String(phraseIndex)); LS('tasbeehCount',String(count));} select.addEventListener('change',()=>{phraseIndex=parseInt(select.value,10)||0; count=0; save(); render(); haptic(10);}); const increment=()=>{const p=TASBEEH_PHRASES[phraseIndex]; count+=1; save(); render(); if(count===p.target) haptic([28,35,28]); else haptic(9);}; btn.addEventListener('click',increment); btn.addEventListener('touchstart',()=>haptic(7),{passive:true}); resetBtn.addEventListener('click',()=>{count=0; save(); render(); haptic(15);}); nextBtn.addEventListener('click',()=>{phraseIndex=(phraseIndex+1)%TASBEEH_PHRASES.length; count=0; save(); render(); haptic([15,18,15]);}); render();}
+
 function dayKey(){return new Date().toDateString()}
 
 function updateGlobalProgress(list, keyPrefix) {
@@ -236,37 +244,12 @@ function updateGlobalProgress(list, keyPrefix) {
 function renderPager(container,list,keyPrefix){
   if(!list) return; updateGlobalProgress(list, keyPrefix);
   let index=parseInt(LS(`pager:${keyPrefix}:index`)||'0',10); if(Number.isNaN(index)||index<0||index>=list.length) index=0;
-  // منطق العودة للبداية بعد 6 ساعات
   const lastSavedTime = parseInt(LS(`pager:${keyPrefix}:time`)||'0',10);
   if(Date.now() - lastSavedTime > 6 * 3600 * 1000) { index = 0; }
   LS(`pager:${keyPrefix}:time`, String(Date.now()));
   const host=document.createElement('div'); host.className='pager-wrap'; const indexEl=document.createElement('div'); indexEl.className='pager-index'; const card=document.createElement('div'); card.className='pager-card'; const controls=document.createElement('div'); controls.className='pager-controls'; const prev=document.createElement('button'); prev.className='btn secondary'; prev.textContent='السابق'; const next=document.createElement('button'); next.className='btn'; next.textContent='التالي'; 
   controls.append(prev,next); host.append(indexEl,card,controls); container.appendChild(host); 
-  function setupTrueIshaToggle() {
-  const btn = qs('#btnToggleTrueIsha');
-  const container = qs('#trueIshaContainer');
-  const adhanLabel = qs('#ishaAdhanLabel');
-  
-  const updateUI = () => {
-    const isVisible = LS('showTrueIsha') === 'true';
-    if(container) container.style.display = isVisible ? 'block' : 'none';
-    if(adhanLabel) adhanLabel.style.display = isVisible ? 'inline' : 'none';
-    if(btn) {
-      btn.textContent = isVisible ? 'إخفاء العشاء الفعلي' : 'إظهار العشاء الفعلي';
-      // اختيارياً: تغيير شكل الزر إذا كان نشطاً
-      btn.style.borderColor = isVisible ? 'var(--accent)' : 'var(--border)';
-    }
-  };
 
-  btn?.addEventListener('click', () => {
-    const currentState = LS('showTrueIsha') === 'true';
-    LS('showTrueIsha', String(!currentState));
-    updateUI();
-    haptic(10); // اهتزاز خفيف عند الضغط
-  });
-
-  updateUI();
-}
   function update(){
     const it=list[index]; if(!it) return; const max=it.repeat; const numeric=typeof max==='number'; const repeatedOnce=numeric&&max===1; 
     const k=`dhikr:${keyPrefix}:${index}:${dayKey()}`; let rem=LS(k); rem=rem==null?(numeric?max:0):parseInt(rem,10); if(!numeric) rem=0; 
@@ -289,6 +272,7 @@ function renderPager(container,list,keyPrefix){
   prev.addEventListener('click',()=>{if(index>0){index-=1; update(); haptic(8);}}); next.addEventListener('click',()=>{if(index<list.length-1){index+=1; update(); haptic(8);}}); 
   update();
 }
+
 function renderDhikrList(container,list,keyPrefix){container.innerHTML=''; renderPager(container,list,keyPrefix);}
 
 async function loadAdhkar(){
@@ -348,33 +332,18 @@ async function openSurah(num, name) {
   reader.style.display = 'block';
   qs('#surahTitle').textContent = 'جاري التحميل...';
   qs('#quranText').innerHTML = '';
-  
   try {
     const res = await fetch(`https://api.alquran.cloud/v1/surah/${num}/quran-uthmani`);
     const data = await res.json();
     qs('#surahTitle').textContent = name;
-    
     let html = '';
-    // إضافة البسملة للسور عدا الفاتحة والتوبة
-    if (num !== 1 && num !== 9) {
-      html += '<div style="text-align:center; font-size:1.8rem; margin-bottom:15px; color:var(--accent2);">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>';
-    }
-    
+    if (num !== 1 && num !== 9) { html += '<div style="text-align:center; font-size:1.8rem; margin-bottom:15px; color:var(--accent2);">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>'; }
     let ayahs = data.data.ayahs;
-    // معالجة تقنية: إزالة البسملة المدمجة في بداية الآية الأولى لبعض السور عبر الـ API
-    if(num !== 1 && num !== 9 && ayahs[0].text.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ')){
-        ayahs[0].text = ayahs[0].text.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ', '');
-    }
-
-    ayahs.forEach(a => {
-      html += `<span class="ayah-text">${a.text}</span><span class="ayah-number">${a.numberInSurah}</span>`;
-    });
-    
+    if(num !== 1 && num !== 9 && ayahs[0].text.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ')){ ayahs[0].text = ayahs[0].text.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ', ''); }
+    ayahs.forEach(a => { html += `<span class="ayah-text">${a.text}</span><span class="ayah-number">${a.numberInSurah}</span>`; });
     qs('#quranText').innerHTML = html;
     window.scrollTo({top: 0, behavior: 'smooth'});
-  } catch (e) {
-    qs('#quranText').innerHTML = '<div style="text-align:center;">حدث خطأ في تحميل الآيات.</div>';
-  }
+  } catch (e) { qs('#quranText').innerHTML = '<div style="text-align:center;">حدث خطأ في تحميل الآيات.</div>'; }
 }
 
 qs('#backToSurahs')?.addEventListener('click', () => {
@@ -382,13 +351,13 @@ qs('#backToSurahs')?.addEventListener('click', () => {
   qs('#surahList').style.display = 'grid';
   window.scrollTo({top: 0, behavior: 'smooth'});
 });
+
 async function init(){
   const fallbackConfig = { calculation: { method: 4, school: 0 }, duha: { startOffsetAfterSunriseMin: 15, endOffsetBeforeDhuhrMin: 10 }, defaultCity: { label: 'مكة المكرمة', city: 'Makkah', country: 'SA' } };
   CFG = await fetchJSON('./assets/js/config.json', fallbackConfig); 
-  initScheme(); initUI(); initNav(); initCityList(); renderHijri(); loadStoredQibla(); setupCompass(); setupTasbeeh(); qs('#useLocation')?.addEventListener('click',()=>loadPrayerTimes(false)); await loadPrayerTimes(false); await registerSW();
-setupTrueIshaToggle(); // <--- أضف هذا السطر هنا ليتم تفعيل الزر
-  
-  qs('#useLocation')?.addEventListener('click',()=>loadPrayerTimes(false)); await loadPrayerTimes(false); await registerSW();
-
+  initScheme(); initUI(); initNav(); initCityList(); renderHijri(); loadStoredQibla(); setupCompass(); setupTasbeeh(); 
+  setupTrueIshaToggle(); 
+  qs('#useLocation')?.addEventListener('click',()=>loadPrayerTimes(false)); 
+  await loadPrayerTimes(false); await registerSW();
 }
 window.addEventListener('load',init);

@@ -136,7 +136,13 @@
 </section>
     <section id="settings" class="section">
       <h3 class="section-title">إعدادات التطبيق</h3>
-      
+      <div class="pager-card" style="margin-bottom: 16px;">
+    <div style="font-weight: bold; color: var(--accent); margin-bottom: 12px;">أقسام إضافية:</div>
+    <div style="display: grid; gap: 10px; grid-template-columns: 1fr 1fr;">
+       <button onclick="showSection('qibla')" class="btn secondary" style="font-size: 1.2rem;">🧭 القبلة</button>
+       <button onclick="showSection('learning')" class="btn secondary" style="font-size: 1.2rem;">📚 فوائد وتعلم</button>
+    </div>
+  </div>
       <div class="pager-card" style="margin-bottom: 16px;">
         <div style="font-weight: bold; color: var(--accent); margin-bottom: 12px;">المظهر والألوان:</div>
         <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
@@ -190,12 +196,10 @@
 
 <nav class="bottom-nav">
   <button class="active" data-target="times" title="أوقات الصلاة">🕌</button>
-  <button data-target="qibla" title="القبلة">🧭</button>
   <button data-target="adhkar" title="الأذكار">🤲</button>
   <button data-target="quran" title="القرآن">📖</button>
   <button data-target="tasbeeh" title="تسبيح">📿</button>
-  <button data-target="learning" title="تعلم">📚</button>
-  <button data-target="settings" title="الإعدادات">⚙️</button>
+  <button data-target="settings" title="المزيد">⠿</button>
 </nav>
 
 <script src="./assets/js/app.js?v=0.6.2" type="module"></script>
