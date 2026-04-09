@@ -575,6 +575,8 @@ async function openJuz(num) {
   setText('surahTitle', `الجزء ${num}`);
   const textEl = document.getElementById('quranText');
   textEl.innerHTML = 'جاري تحميل الجزء...';
+  const controls = document.getElementById('quranPageControls');
+if(controls) controls.style.display = 'none';
   
   try {
     const res = await fetch(`https://api.alquran.cloud/v1/juz/${num}/quran-uthmani`);
@@ -582,7 +584,24 @@ async function openJuz(num) {
     renderAyahs(data.data.ayahs);
   } catch (e) { textEl.innerHTML = "خطأ في تحميل بيانات الجزء."; }
 }
-
+// دالة فتح السورة
+async function openSurah(number, name) {
+  toggleQuranView(true);
+  setText('surahTitle', name);
+  const textEl = document.getElementById('quranText');
+  textEl.innerHTML = 'جاري تحميل السورة...';
+  const controls = document.getElementById('quranPageControls');
+if(controls) controls.style.display = 'none';
+  
+  try {
+    // جلب بيانات السورة من الـ API
+    const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-uthmani`);
+    const data = await res.json();
+    renderAyahs(data.data.ayahs);
+  } catch (e) { 
+    textEl.innerHTML = "خطأ في تحميل بيانات السورة."; 
+  }
+}
 // 7. دالة مساعدة لعرض الآيات مع أرقامها بتصميمك الجديد
 function renderAyahs(ayahs) {
   let html = '';
@@ -603,3 +622,106 @@ function toggleQuranView(isReading) {
 
 // تحديث زر العودة
 document.getElementById('backToSurahs')?.addEventListener('click', () => toggleQuranView(false));
+
+// --- دوال القراءة بالصفحات وحفظ التقدم ---
+
+let currentQuranPage = 1;
+
+// 1. تحديث دالة إعداد التبويبات (استبدل الدالة القديمة setupQuranTabs بهذه)
+function setupQuranTabs() {
+  const tabs = document.querySelectorAll('#quranTabs button');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      const searchInput = document.getElementById('quranSearch');
+      
+      if (tab.dataset.tab === 'juz') {
+        searchInput.style.display = 'none'; // إخفاء البحث في الأجزاء
+        renderJuzList();
+      } else if (tab.dataset.tab === 'page') {
+        searchInput.style.display = 'none'; // إخفاء البحث في الصفحات
+        renderPageList();
+      } else {
+        searchInput.style.display = 'block'; // إظهار البحث في السور
+        renderSurahs(allSurahs);
+      }
+    });
+  });
+}
+
+// 2. عرض واجهة إدخال رقم الصفحة
+function renderPageList() {
+    const container = document.getElementById('surahList');
+    container.innerHTML = `
+        <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 20px; background: var(--bg);">
+            <h3 style="color: var(--accent); margin-bottom: 15px;">الانتقال لصفحة محددة</h3>
+            <input type="number" id="pageInputGo" min="1" max="604" placeholder="أدخل رقم الصفحة (1 - 604)" 
+                   style="width: 100%; padding: 15px; margin-bottom: 15px; border-radius: var(--radius); border: 2px solid var(--border); background: var(--bg2); color: var(--fg); text-align: center; font-size: 1.5rem; outline: none;">
+            <button class="btn" id="btnGoToPage" style="width: 100%; font-size: 1.4rem;">اذهب للصفحة</button>
+        </div>
+    `;
+    document.getElementById('btnGoToPage').addEventListener('click', () => {
+        const p = parseInt(document.getElementById('pageInputGo').value);
+        if (p >= 1 && p <= 604) openPage(p);
+        else alert('الرجاء إدخال رقم صحيح بين 1 و 604');
+    });
+}
+
+// 3. دالة فتح الصفحة وحفظها في التخزين المحلي (LocalStorage)
+async function openPage(pageNum) {
+    if (pageNum < 1) pageNum = 1;
+    if (pageNum > 604) pageNum = 604;
+    
+    currentQuranPage = pageNum;
+    LS('lastReadPage', pageNum); // حفظ تقدم القراءة
+    checkLastRead(); // تحديث زر המتابعة في الأعلى
+    
+    toggleQuranView(true);
+    
+    // إظهار أزرار التحكم بالصفحات السفلية
+    const controls = document.getElementById('quranPageControls');
+    if(controls) controls.style.display = 'flex';
+    setText('pageInfo', `ص ${pageNum}`);
+    setText('surahTitle', `الصفحة ${pageNum}`);
+    
+    const textEl = document.getElementById('quranText');
+    textEl.innerHTML = 'جاري تحميل الصفحة...';
+    
+    try {
+        const res = await fetch(`https://api.alquran.cloud/v1/page/${pageNum}/quran-uthmani`);
+        const data = await res.json();
+        
+        // استخراج اسم السورة من أول آية في الصفحة لعرضه
+        if(data.data.ayahs.length > 0) {
+            setText('surahTitle', `${data.data.ayahs[0].surah.name} - ص ${pageNum}`);
+        }
+        
+        renderAyahs(data.data.ayahs);
+    } catch (e) { 
+        textEl.innerHTML = "خطأ في تحميل بيانات الصفحة."; 
+    }
+}
+
+// 4. دالة التحقق من وجود قراءة سابقة
+function checkLastRead() {
+    const lastPage = LS('lastReadPage');
+    const btn = document.getElementById('btnContinueReading');
+    if (lastPage && btn) {
+        btn.style.display = 'block';
+        setText('lastReadPageNum', lastPage);
+        btn.onclick = () => openPage(parseInt(lastPage));
+    }
+}
+
+// 5. ربط أزرار التقليب في القارئ
+document.getElementById('btnNextPage')?.addEventListener('click', () => openPage(currentQuranPage + 1));
+document.getElementById('btnPrevPage')?.addEventListener('click', () => openPage(currentQuranPage - 1));
+
+// (مهم): استدعاء دالة الفحص بمجرد تحميل قائمة السور
+const originalLoadSurahList = loadSurahList;
+loadSurahList = async function() {
+    await originalLoadSurahList();
+    checkLastRead();
+};

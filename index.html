@@ -140,15 +140,21 @@
       </div>
     </section>
 
-  <section id="quran" class="section">
+ <section id="quran" class="section">
   <div class="quran-header">
     <h3 class="section-title">القرآن الكريم</h3>
+    
+    <button id="btnContinueReading" class="btn" style="width: 100%; margin-bottom: 15px; display: none; background: var(--accent2); font-size:1.4rem;">
+       📖 متابعة القراءة (صفحة <span id="lastReadPageNum"></span>)
+    </button>
+
     <input type="text" id="quranSearch" placeholder="🔍 ابحث عن اسم السورة..." 
            style="width: 100%; margin-bottom: 15px; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--fg);">
     
-    <div id="quranTabs" class="pills" style="grid-template-columns: 1fr 1fr; margin-bottom: 15px;">
+    <div id="quranTabs" class="pills" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 15px;">
       <button class="active" data-tab="surah">السور</button>
       <button data-tab="juz">الأجزاء</button>
+      <button data-tab="page">الصفحات</button>
     </div>
   </div>
 
@@ -160,9 +166,16 @@
     <div class="reading-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <button id="backToSurahs" class="btn secondary" style="font-size: 1.2rem;">← عودة</button>
       <div id="surahTitle" style="font-size: 1.8rem; color: var(--accent); font-weight:bold;"></div>
-      <div style="width: 40px;"></div> </div>
+      <div style="width: 40px;"></div> 
+    </div>
     
     <div id="quranText" class="quran-text-container"></div>
+    
+    <div id="quranPageControls" class="reading-controls" style="display: none; justify-content: space-between; align-items: center; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px;">
+       <button id="btnNextPage" class="btn secondary" style="min-width: 90px;">التالية ←</button>
+       <div id="pageInfo" style="font-weight: bold; color: var(--muted); font-size: 1.3rem;"></div>
+       <button id="btnPrevPage" class="btn secondary" style="min-width: 90px;">→ السابقة</button>
+    </div>
   </div>
 </section>
 
