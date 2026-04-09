@@ -477,9 +477,8 @@ qs('#backToSurahs')?.addEventListener('click', () => {
 });
 
 async function init(){
-  const fallbackConfig = { calculation: { method: 4, school: 0 }, duha: { startOffsetAfterSunriseMin: 15, endOffsetBeforeDhuhrMin: 10 }, defaultCity: { label: 'مكة المكرمة', city: 'Makkah', country: 'SA' } };
-  CFG = await fetchJSON('./assets/js/config.json', fallbackConfig); 
-  initScheme(); initUI(); initNav(); initCityList(); renderHijri(); loadStoredQibla(); setupCompass(); setupTasbeeh(); 
+  CFG = { calculation: { method: 4, school: 0 }, duha: { startOffsetAfterSunriseMin: 15, endOffsetBeforeDhuhrMin: 10 }, defaultCity: { label: 'مكة المكرمة', city: 'Makkah', country: 'SA' } };
+   initScheme(); initUI(); initNav(); initCityList(); renderHijri(); loadStoredQibla(); setupCompass(); setupTasbeeh(); 
   setupTrueIshaToggle(); 
   qs('#useLocation')?.addEventListener('click',()=>loadPrayerTimes(false)); 
   await loadPrayerTimes(false); await registerSW();
