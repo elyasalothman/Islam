@@ -1,24 +1,31 @@
-// Rafiq Muslim v1.0.0 - النسخة الرسمية الأولى
+// Rafiq Muslim v1.1.3 - تحديث القرآن الكبير
 const API_BASE='https://api.aladhan.com/v1';
 const KAABA={lat:21.4225,lon:39.8262};
 const BDC_REVERSE='https://api-bdc.net/data/reverse-geocode-client';
 const qs=(s,r=document)=>r.querySelector(s), qsa=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const LS = (k,v) => { try { if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); } catch(e) { return null; } };
 
-let CFG=null, nextTimer=null; let loaded={adhkar:false, resources:false, learning:false, quran:false};
+let CFG=null, nextTimer=null; let loaded={adhkar:false, resources:false, learning:false, quran:false, asma:false};
 let rawAdhkarData=null; let showTashkeel=LS('tashkeel')!=='false'; 
 let currentFontSize = parseFloat(LS('fontSize')); if(isNaN(currentFontSize)) currentFontSize = 1.5;
 
 const I18N = {
-  ar: { app_name: "تهجد", date_label: "التاريخ", next_prayer: "الصلاة القادمة", city_label: "المدينة", nav_times: "أوقات الصلاة", nav_adhkar: "الأذكار", nav_quran: "القرآن", nav_tasbeeh: "تسبيح", nav_settings: "المزيد", Fajr: "الفجر", Sunrise: "الشروق", Dhuhr: "الظهر", Asr: "العصر", Maghrib: "المغرب", Isha: "العشاء", Duha: "الضحى", last_third: "الثلث الأخير", lang_label: "اللغة / Language", daily_table: "جدول مواعيد الصلاة اليومي", prayer_th: "الصلاة", start_th: "دخول", end_th: "خروج", qibla_angle: "زاوية القبلة:", qibla_btn: "اتجاه القبلة", daily_benefit: "فائدة اليوم", tasbeeh_next: "التالي", tasbeeh_counter: "العدّاد", tasbeeh_target: "الهدف", tasbeeh_btn: "سَبِّح", tasbeeh_reset: "تصفير", quran_title: "القرآن الكريم", tab_surah: "السور", tab_juz: "الأجزاء", tab_page: "الصفحات", back_btn: "← عودة", next_page: "التالية ←", prev_page: "→ السابقة", search_placeholder: "🔍 ابحث عن اسم السورة...", settings_title: "إعدادات التطبيق", extra_sections: "أقسام إضافية:", appearance: "المظهر والألوان:", reading_alerts: "القراءة والتنبيهات:", prayer_settings: "إعدادات أوقات الصلاة:", true_isha_title: "وقت العشاء الفعلي:", hijri_adj_title: "ضبط التاريخ الهجري:", install_title: "ثبت التطبيق على جهازك:", learning_title: "فوائد وتعلم", sources_title: "مصادر وروابط", reminders_title: "تذكيرات", update_msg: "تحديث جديد متوفر", update_btn: "تحديث", later_btn: "لاحقًا", locating: "جاري التحديد…", my_location: "موقعي", location_disabled: "لم يتم تفعيل الموقع، اختر مدينتك يدوياً.", now: "حان الوقت", time_passed: "منذ {m} د", tab_morning: "الصباح 🌅", tab_evening: "المساء 🌙", tab_sleep: "النوم 😴", tab_wakeup: "الاستيقاظ ☀️", tab_afterPrayer: "بعد الصلاة 📿", tab_home: "المنزل 🏠", tab_mosque: "المسجد 🕌", tab_worry: "الهم والحزن 💔", tab_travel: "السفر ✈️", tab_illness: "المرض 💊", tab_dua: "أدعية 🤲", tab_daily: "متفرقة 🌟", btn_tashkeel: "التشكيل (بَ/ب)", btn_notify: "تنبيه الأذان 🔔", btn_audio_on: "صوت الأذان 🔊", btn_audio_off: "صوت الأذان 🔇", btn_font_inc: "تكبير الخط (A+)", btn_font_dec: "تصغير الخط (A-)", btn_qibla_sec: "🧭 القبلة", btn_learn_sec: "📚 فوائد وتعلم", btn_install: "📲 تثبيت تطبيق تهجد", continue_reading: "📖 متابعة القراءة", pager_prev: "السابق", pager_next: "التالي", pager_copy: "نسخ", pager_ref: "مرجع", pager_done: "تم", pager_source: "المصدر:", loading: "جاري التحميل...", manual_city: "— اختر مدينة يدوياً —" },
-  en: { app_name: "Tahajjud", date_label: "Date", next_prayer: "Next Prayer", city_label: "City", nav_times: "Prayer Times", nav_adhkar: "Adhkar", nav_quran: "Quran", nav_tasbeeh: "Tasbeeh", nav_settings: "Settings", Fajr: "Fajr", Sunrise: "Sunrise", Dhuhr: "Dhuhr", Asr: "Asr", Maghrib: "Maghrib", Isha: "Isha", Duha: "Duha", last_third: "Last Third", lang_label: "Language / اللغة", daily_table: "Daily Prayer Schedule", prayer_th: "Prayer", start_th: "Start", end_th: "End", qibla_angle: "Qibla Angle:", qibla_btn: "Qibla Direction", daily_benefit: "Daily Benefit", tasbeeh_next: "Next", tasbeeh_counter: "Counter", tasbeeh_target: "Target", tasbeeh_btn: "Tasbeeh", tasbeeh_reset: "Reset", quran_title: "Holy Quran", tab_surah: "Surahs", tab_juz: "Juz", tab_page: "Pages", back_btn: "← Back", next_page: "Next ←", prev_page: "→ Prev", search_placeholder: "🔍 Search Surah...", settings_title: "App Settings", extra_sections: "Extra Sections:", appearance: "Appearance & Colors:", reading_alerts: "Reading & Alerts:", prayer_settings: "Prayer Settings:", true_isha_title: "True Isha Time:", hijri_adj_title: "Hijri Date Adjustment:", install_title: "Install App:", learning_title: "Learning & Benefits", sources_title: "Sources & Links", reminders_title: "Reminders", update_msg: "New update available", update_btn: "Update", later_btn: "Later", locating: "Locating...", my_location: "My Location", location_disabled: "Location disabled, choose city manually.", now: "Now", time_passed: "{m}m ago", tab_morning: "Morning 🌅", tab_evening: "Evening 🌙", tab_sleep: "Sleep 😴", tab_wakeup: "Wakeup ☀️", tab_afterPrayer: "After Prayer 📿", tab_home: "Home 🏠", tab_mosque: "Mosque 🕌", tab_worry: "Worry 💔", tab_travel: "Travel ✈️", tab_illness: "Illness 💊", tab_dua: "Dua 🤲", tab_daily: "Daily 🌟", btn_tashkeel: "Diacritics", btn_notify: "Adhan Alert 🔔", btn_audio_on: "Adhan Audio 🔊", btn_audio_off: "Adhan Audio 🔇", btn_font_inc: "Larger Font (A+)", btn_font_dec: "Smaller Font (A-)", btn_qibla_sec: "🧭 Qibla", btn_learn_sec: "📚 Learning", btn_install: "📲 Install App", continue_reading: "📖 Continue Reading", pager_prev: "Prev", pager_next: "Next", pager_copy: "Copy", pager_ref: "Ref", pager_done: "Done", pager_source: "Source:", loading: "Loading...", manual_city: "— Select City Manually —" },
-  ur: { app_name: "تہجد", date_label: "تاریخ", next_prayer: "اگلی نماز", city_label: "شہر", nav_times: "اوقات نماز", nav_adhkar: "اذکار", nav_quran: "قرآن", nav_tasbeeh: "تسبیح", nav_settings: "مزید", Fajr: "فجر", Sunrise: "طلوع آفتاب", Dhuhr: "ظہر", Asr: "عصر", Maghrib: "مغرب", Isha: "عشاء", Duha: "چاشت", last_third: "آخری تہائی", lang_label: "زبان / Language", daily_table: "روزانہ نماز کا شیڈول", prayer_th: "نماز", start_th: "شروع", end_th: "ختم", qibla_angle: "زاویہ قبلہ:", qibla_btn: "سمت قبلہ", daily_benefit: "آج کا فائدہ", tasbeeh_next: "اگلا", tasbeeh_counter: "کاؤنٹر", tasbeeh_target: "ہدف", tasbeeh_btn: "تسبیح", tasbeeh_reset: "ری سیٹ", quran_title: "قرآن مجید", tab_surah: "سورتیں", tab_juz: "پارے", tab_page: "صفحات", back_btn: "← پیچھے", next_page: "اگلا ←", prev_page: "→ پچھلا", search_placeholder: "🔍 سورت تلاش کریں...", settings_title: "ایپ کی ترتیبات", extra_sections: "مزید حصے:", appearance: "ظاہری شکل و رنگ:", reading_alerts: "پڑھنا اور الرٹس:", prayer_settings: "نماز کی ترتیبات:", true_isha_title: "عشاء کا اصل وقت:", hijri_adj_title: "ہجری تاریخ کی ترتیب:", install_title: "ایپ انسٹال کریں:", learning_title: "فوائد اور سیکھنا", sources_title: "ذرائع اور لنکس", reminders_title: "یاد دہانیاں", update_msg: "نئی اپ ڈیٹ دستیاب ہے", update_btn: "اپ ڈیٹ", later_btn: "بعد میں", locating: "تلاش کر رہا ہے...", my_location: "میرا مقام", location_disabled: "مقام غیر فعال ہے۔", now: "وقت ہو گیا", time_passed: "{m} منٹ پہلے", tab_morning: "صبح 🌅", tab_evening: "شام 🌙", tab_sleep: "نیند 😴", tab_wakeup: "بیداری ☀️", tab_afterPrayer: "نماز کے بعد 📿", tab_home: "گھر 🏠", tab_mosque: "مسجد 🕌", tab_worry: "پریشانی 💔", tab_travel: "سفر ✈️", tab_illness: "بیماری 💊", tab_dua: "دعائیں 🤲", tab_daily: "روزانہ 🌟", btn_tashkeel: "زیر زبر", btn_notify: "اذان الرٹ 🔔", btn_audio_on: "اذان آواز 🔊", btn_audio_off: "اذان آواز 🔇", btn_font_inc: "بڑا فونٹ (A+)", btn_font_dec: "چھوٹا فونٹ (A-)", btn_qibla_sec: "🧭 قبلہ", btn_learn_sec: "📚 سیکھنا", btn_install: "📲 ایپ انسٹال کریں", continue_reading: "📖 پڑھنا جاری رکھیں", pager_prev: "پچھلا", pager_next: "اگلا", pager_copy: "کاپی", pager_ref: "حوالہ", pager_done: "مکمل", pager_source: "ذریعہ:", loading: "لوڈ ہو رہا ہے...", manual_city: "— دستی شہر منتخب کریں —" },
-  bn: { app_name: "তাহাজ্জুদ", date_label: "তারিখ", next_prayer: "পরবর্তী নামাজ", city_label: "শহর", nav_times: "নামাজের সময়", nav_adhkar: "জিকির", nav_quran: "কুরআন", nav_tasbeeh: "তাসবিহ", nav_settings: "সেটিংস", Fajr: "ফজর", Sunrise: "সূর্যোদয়", Dhuhr: "যোহর", Asr: "আসর", Maghrib: "মাগরিব", Isha: "এশা", Duha: "চাশত", last_third: "শেষ তৃতীয়াংশ", lang_label: "ভাষা / Language", daily_table: "দৈনিক নামাজের সময়সূচী", prayer_th: "নামাজ", start_th: "শুরু", end_th: "শেষ", qibla_angle: "কিবলার কোণ:", qibla_btn: "কিবলার দিক", daily_benefit: "আজকের উপকারিতা", tasbeeh_next: "পরবর্তী", tasbeeh_counter: "কাউন্টার", tasbeeh_target: "লক্ষ্য", tasbeeh_btn: "তাসবিহ", tasbeeh_reset: "রিসেট", quran_title: "পবিত্র কুরআন", tab_surah: "সূরা", tab_juz: "পারা", tab_page: "পৃষ্ঠা", back_btn: "← ফিরে যান", next_page: "পরবর্তী ←", prev_page: "→ পূর্ববর্তী", search_placeholder: "🔍 সূরা অনুসন্ধান...", settings_title: "অ্যাপ সেটিংস", extra_sections: "অতিরিক্ত বিভাগ:", appearance: "উপস্থিতি এবং রঙ:", reading_alerts: "পড়া এবং সতর্কতা:", prayer_settings: "নামাজের সেটিংস:", true_isha_title: "প্রকৃত এশার সময়:", hijri_adj_title: "হিজরি তারিখ সমন্বয়:", install_title: "অ্যাপ ইনস্টল করুন:", learning_title: "শিক্ষা ও উপকারিতা", sources_title: "উৎস এবং লিঙ্ক", reminders_title: "অনুস্মারক", update_msg: "নতুন আপডেট উপলব্ধ", update_btn: "আপডেট", later_btn: "পরে", locating: "অবস্থান নির্ণয়...", my_location: "আমার অবস্থান", location_disabled: "অবস্থান অক্ষম।", now: "এখন", time_passed: "{m} মি. আগে", tab_morning: "সকাল 🌅", tab_evening: "সন্ধ্যা 🌙", tab_sleep: "ঘুম 😴", tab_wakeup: "জাগরণ ☀️", tab_afterPrayer: "নামাজের পর 📿", tab_home: "বাড়ি 🏠", tab_mosque: "মসজিদ 🕌", tab_worry: "দুশ্চিন্তা 💔", tab_travel: "ভ্রমণ ✈️", tab_illness: "অসুস্থতা 💊", tab_dua: "দোয়া 🤲", tab_daily: "দৈনিক 🌟", btn_tashkeel: "যের যবর", btn_notify: "আজান সতর্কতা 🔔", btn_audio_on: "আজানের শব্দ 🔊", btn_audio_off: "আজানের শব্দ 🔇", btn_font_inc: "বড় ফন্ট (A+)", btn_font_dec: "ছোট ফন্ট (A-)", btn_qibla_sec: "🧭 কিবলা", btn_learn_sec: "📚 শিক্ষা", btn_install: "📲 অ্যাপ ইনস্টল করুন", continue_reading: "📖 পড়া চালিয়ে যান", pager_prev: "পূর্ববর্তী", pager_next: "পরবর্তী", pager_copy: "কপি", pager_ref: "সূত্র", pager_done: "সম্পন্ন", pager_source: "সূত্র:", loading: "লোড হচ্ছে...", manual_city: "— ম্যানুয়ালি শহর নির্বাচন করুন —" },
-  id: { app_name: "Tahajjud", date_label: "Tanggal", next_prayer: "Waktu Shalat", city_label: "Kota", nav_times: "Jadwal", nav_adhkar: "Dzikir", nav_quran: "Al-Qur'an", nav_tasbeeh: "Tasbih", nav_settings: "Pengaturan", Fajr: "Subuh", Sunrise: "Terbit", Dhuhr: "Dzuhur", Asr: "Ashar", Maghrib: "Maghrib", Isha: "Isya", Duha: "Dhuha", last_third: "Sepertiga Malam", lang_label: "Bahasa / Language", daily_table: "Jadwal Shalat Harian", prayer_th: "Shalat", start_th: "Mulai", end_th: "Akhir", qibla_angle: "Sudut Kiblat:", qibla_btn: "Arah Kiblat", daily_benefit: "Manfaat Hari Ini", tasbeeh_next: "Lanjut", tasbeeh_counter: "Penghitung", tasbeeh_target: "Target", tasbeeh_btn: "Tasbih", tasbeeh_reset: "Reset", quran_title: "Al-Qur'an Suci", tab_surah: "Surah", tab_juz: "Juz", tab_page: "Halaman", back_btn: "← Kembali", next_page: "Lanjut ←", prev_page: "→ Prev", search_placeholder: "🔍 Cari Surah...", settings_title: "Pengaturan Aplikasi", extra_sections: "Bagian Tambahan:", appearance: "Tampilan & Warna:", reading_alerts: "Membaca & Peringatan:", prayer_settings: "Pengaturan Shalat:", true_isha_title: "Waktu Isya Sebenarnya:", hijri_adj_title: "Penyesuaian Hijriah:", install_title: "Instal Aplikasi:", learning_title: "Pembelajaran & Manfaat", sources_title: "Sumber & Tautan", reminders_title: "Pengingat", update_msg: "Pembaruan tersedia", update_btn: "Perbarui", later_btn: "Nanti", locating: "Mencari lokasi...", my_location: "Lokasi Saya", location_disabled: "Lokasi dinonaktifkan.", now: "Sekarang", time_passed: "{m}m yg lalu", tab_morning: "Pagi 🌅", tab_evening: "Malam 🌙", tab_sleep: "Tidur 😴", tab_wakeup: "Bangun ☀️", tab_afterPrayer: "Setelah Shalat 📿", tab_home: "Rumah 🏠", tab_mosque: "Masjid 🕌", tab_worry: "Kekhawatiran 💔", tab_travel: "Bepergian ✈️", tab_illness: "Sakit 💊", tab_dua: "Doa 🤲", tab_daily: "Harian 🌟", btn_tashkeel: "Harakat", btn_notify: "Notifikasi Adzan 🔔", btn_audio_on: "Suara Adzan 🔊", btn_audio_off: "Suara Adzan 🔇", btn_font_inc: "Perbesar Font (A+)", btn_font_dec: "Perkecil Font (A-)", btn_qibla_sec: "🧭 Kiblat", btn_learn_sec: "📚 Belajar", btn_install: "📲 Instal Aplikasi", continue_reading: "📖 Lanjut Membaca", pager_prev: "Seblm", pager_next: "Lanjut", pager_copy: "Salin", pager_ref: "Ref", pager_done: "Selesai", pager_source: "Sumber:", loading: "Memuat...", manual_city: "— Pilih Kota Manual —" },
-  tr: { app_name: "Teheccüd", date_label: "Tarih", next_prayer: "Sonraki Namaz", city_label: "Şehir", nav_times: "Vakitler", nav_adhkar: "Zikirler", nav_quran: "Kuran", nav_tasbeeh: "Tesbih", nav_settings: "Ayarlar", Fajr: "İmsak", Sunrise: "Güneş", Dhuhr: "Öğle", Asr: "İkindi", Maghrib: "Akşam", Isha: "Yatsı", Duha: "Kuşluk", last_third: "Son Üçte Bir", lang_label: "Dil / Language", daily_table: "Günlük Namaz Vakitleri", prayer_th: "Namaz", start_th: "Giriş", end_th: "Çıkış", qibla_angle: "Kıble Açısı:", qibla_btn: "Kıble Yönü", daily_benefit: "Günün Faydası", tasbeeh_next: "İleri", tasbeeh_counter: "Sayaç", tasbeeh_target: "Hedef", tasbeeh_btn: "Tesbih", tasbeeh_reset: "Sıfırla", quran_title: "Kur'an-ı Kerim", tab_surah: "Sureler", tab_juz: "Cüz", tab_page: "Sayfalar", back_btn: "← Geri", next_page: "İleri ←", prev_page: "→ Önceki", search_placeholder: "🔍 Sure Ara...", settings_title: "Uygulama Ayarları", extra_sections: "Ek Bölümler:", appearance: "Görünüm ve Renkler:", reading_alerts: "Okuma ve Uyarılar:", prayer_settings: "Namaz Ayarları:", true_isha_title: "Gerçek Yatsı:", hijri_adj_title: "Hicri Tarih Ayarı:", install_title: "Uygulamayı Yükle:", learning_title: "Öğrenim ve Faydalar", sources_title: "Kaynaklar ve Bağlantılar", reminders_title: "Hatırlatmalar", update_msg: "Güncelleme mevcut", update_btn: "Güncelle", later_btn: "Sonra", locating: "Konum bulunuyor...", my_location: "Konumum", location_disabled: "Konum kapalı.", now: "Şimdi", time_passed: "{m} dk önce", tab_morning: "Sabah 🌅", tab_evening: "Akşam 🌙", tab_sleep: "Uyku 😴", tab_wakeup: "Uyanış ☀️", tab_afterPrayer: "Namaz Sonrası 📿", tab_home: "Ev 🏠", tab_mosque: "Cami 🕌", tab_worry: "Endişe 💔", tab_travel: "Seyahat ✈️", tab_illness: "Hastalık 💊", tab_dua: "Dua 🤲", tab_daily: "Günlük 🌟", btn_tashkeel: "Harekeler", btn_notify: "Ezan Bildirimi 🔔", btn_audio_on: "Ezan Sesi 🔊", btn_audio_off: "Ezan Sesi 🔇", btn_font_inc: "Yazıyı Büyüt (A+)", btn_font_dec: "Yazıyı Küçült (A-)", btn_qibla_sec: "🧭 Kıble", btn_learn_sec: "📚 Öğrenim", btn_install: "📲 Uygulamayı Yükle", continue_reading: "📖 Okumaya Devam Et", pager_prev: "Önceki", pager_next: "Sonraki", pager_copy: "Kopyala", pager_ref: "Kaynak", pager_done: "Tamam", pager_source: "Kaynak:", loading: "Yükleniyor...", manual_city: "— Şehri Manuel Seçin —" },
-  fa: { app_name: "تهجد", date_label: "تاریخ", next_prayer: "نماز بعدی", city_label: "شهر", nav_times: "اوقات شرعی", nav_adhkar: "اذکار", nav_quran: "قرآن", nav_tasbeeh: "تسبیح", nav_settings: "بیشتر", Fajr: "صبح", Sunrise: "طلوع", Dhuhr: "ظهر", Asr: "عصر", Maghrib: "مغرب", Isha: "عشاء", Duha: "چاشت", last_third: "ثلث آخر", lang_label: "زبان / Language", daily_table: "جدول روزانه اوقات شرعی", prayer_th: "نماز", start_th: "شروع", end_th: "پایان", qibla_angle: "زاویه قبله:", qibla_btn: "جهت قبله", daily_benefit: "فایده روز", tasbeeh_next: "بعدی", tasbeeh_counter: "شمارشگر", tasbeeh_target: "هدف", tasbeeh_btn: "تسبیح", tasbeeh_reset: "بازنشانی", quran_title: "قرآن کریم", tab_surah: "سوره‌ها", tab_juz: "جزءها", tab_page: "صفحات", back_btn: "← بازگشت", next_page: "بعدی ←", prev_page: "→ قبلی", search_placeholder: "🔍 جستجوی سوره...", settings_title: "تنظیمات برنامه", extra_sections: "بخش‌های بیشتر:", appearance: "ظاهر و رنگ‌ها:", reading_alerts: "خواندن و هشدارها:", prayer_settings: "تنظیمات نماز:", true_isha_title: "وقت واقعی عشاء:", hijri_adj_title: "تنظیم تاریخ هجری:", install_title: "نصب برنامه:", learning_title: "یادگیری و فواید", sources_title: "منابع و پیوندها", reminders_title: "یادآوری‌ها", update_msg: "بروزرسانی جدید", update_btn: "بروزرسانی", later_btn: "بعداً", locating: "مکان‌یابی...", my_location: "مکان من", location_disabled: "مکان‌یابی غیرفعال است.", now: "اکنون", time_passed: "{m} دقیقه پیش", tab_morning: "صبح 🌅", tab_evening: "شام 🌙", tab_sleep: "خواب 😴", tab_wakeup: "بیدار شدن ☀️", tab_afterPrayer: "بعد از نماز 📿", tab_home: "خانه 🏠", tab_mosque: "مسجد 🕌", tab_worry: "نگرانی 💔", tab_travel: "سفر ✈️", tab_illness: "بیماری 💊", tab_dua: "دعا 🤲", tab_daily: "روزانه 🌟", btn_tashkeel: "اعراب‌گذاری", btn_notify: "هشدار اذان 🔔", btn_audio_on: "صدای اذان 🔊", btn_audio_off: "صدای اذان 🔇", btn_font_inc: "بزرگ‌نمایی (A+)", btn_font_dec: "کوچک‌نمایی (A-)", btn_qibla_sec: "🧭 قبله", btn_learn_sec: "📚 یادگیری", btn_install: "📲 نصب برنامه", continue_reading: "📖 ادامه خواندن", pager_prev: "قبلی", pager_next: "بعدی", pager_copy: "کپی", pager_ref: "منبع", pager_done: "انجام شد", pager_source: "منبع:", loading: "در حال بارگذاری...", manual_city: "— انتخاب دستی شهر —" },
-  fr: { app_name: "Tahajjud", date_label: "Date", next_prayer: "Prochaine Prière", city_label: "Ville", nav_times: "Horaires", nav_adhkar: "Adhkar", nav_quran: "Coran", nav_tasbeeh: "Tasbih", nav_settings: "Paramètres", Fajr: "Fajr", Sunrise: "Chourouk", Dhuhr: "Dhohr", Asr: "Asr", Maghrib: "Maghrib", Isha: "Isha", Duha: "Duha", last_third: "Dernier Tiers", lang_label: "Langue / Language", daily_table: "Horaires de Prière", prayer_th: "Prière", start_th: "Début", end_th: "Fin", qibla_angle: "Angle Qibla:", qibla_btn: "Direction Qibla", daily_benefit: "Bénéfice du Jour", tasbeeh_next: "Suivant", tasbeeh_counter: "Compteur", tasbeeh_target: "Cible", tasbeeh_btn: "Tasbih", tasbeeh_reset: "Réinitialiser", quran_title: "Saint Coran", tab_surah: "Sourates", tab_juz: "Juz", tab_page: "Pages", back_btn: "← Retour", next_page: "Suivant ←", prev_page: "→ Précédent", search_placeholder: "🔍 Rechercher...", settings_title: "Paramètres", extra_sections: "Sections Extra:", appearance: "Apparence & Couleurs:", reading_alerts: "Lecture & Alertes:", prayer_settings: "Paramètres Prière:", true_isha_title: "Heure Réelle Isha:", hijri_adj_title: "Ajustement Hijri:", install_title: "Installer l'App:", learning_title: "Apprentissage", sources_title: "Sources & Liens", reminders_title: "Rappels", update_msg: "Nouvelle mise à jour", update_btn: "Mettre à jour", later_btn: "Plus tard", locating: "Localisation...", my_location: "Ma Position", location_disabled: "Localisation désactivée.", now: "Maintenant", time_passed: "Il y a {m}m", tab_morning: "Matin 🌅", tab_evening: "Soir 🌙", tab_sleep: "Sommeil 😴", tab_wakeup: "Réveil ☀️", tab_afterPrayer: "Après Prière 📿", tab_home: "Maison 🏠", tab_mosque: "Mosquée 🕌", tab_worry: "Souci 💔", tab_travel: "Voyage ✈️", tab_illness: "Maladie 💊", tab_dua: "Dua 🤲", tab_daily: "Quotidien 🌟", btn_tashkeel: "Diacritiques", btn_notify: "Alerte Adhan 🔔", btn_audio_on: "Audio Adhan 🔊", btn_audio_off: "Audio Adhan 🔇", btn_font_inc: "Agrandir (A+)", btn_font_dec: "Réduire (A-)", btn_qibla_sec: "🧭 Qibla", btn_learn_sec: "📚 Apprentissage", btn_install: "📲 Installer", continue_reading: "📖 Continuer", pager_prev: "Préc.", pager_next: "Suiv.", pager_copy: "Copier", pager_ref: "Réf", pager_done: "Fait", pager_source: "Source:", loading: "Chargement...", manual_city: "— Choisir Ville Manuellement —" }
+  ar: { app_name: "تهجد", date_label: "التاريخ", next_prayer: "الصلاة القادمة", city_label: "المدينة", nav_times: "أوقات الصلاة", nav_adhkar: "الأذكار", nav_quran: "القرآن", nav_tasbeeh: "تسبيح", nav_settings: "المزيد", Fajr: "الفجر", Sunrise: "الشروق", Dhuhr: "الظهر", Asr: "العصر", Maghrib: "المغرب", Isha: "العشاء", Duha: "الضحى", last_third: "الثلث الأخير", lang_label: "اللغة / Language", daily_table: "جدول مواعيد الصلاة اليومي", prayer_th: "الصلاة", start_th: "دخول", end_th: "خروج", qibla_angle: "زاوية القبلة:", qibla_btn: "اتجاه القبلة", daily_benefit: "فائدة اليوم", tasbeeh_next: "التالي", tasbeeh_counter: "العدّاد", tasbeeh_target: "الهدف", tasbeeh_btn: "سَبِّح", tasbeeh_reset: "تصفير", quran_title: "القرآن الكريم", tab_surah: "السور", tab_juz: "الأجزاء", tab_page: "الصفحات", back_btn: "← عودة", next_page: "التالية ←", prev_page: "→ السابقة", search_placeholder: "🔍 ابحث عن اسم السورة...", settings_title: "إعدادات التطبيق", extra_sections: "أقسام إضافية:", appearance: "المظهر والألوان:", reading_alerts: "القراءة والتنبيهات:", prayer_settings: "إعدادات أوقات الصلاة:", true_isha_title: "وقت العشاء الفعلي:", hijri_adj_title: "ضبط التاريخ الهجري:", install_title: "ثبت التطبيق على جهازك:", learning_title: "فوائد وتعلم", sources_title: "مصادر وروابط", reminders_title: "تذكيرات", update_msg: "تحديث جديد متوفر", update_btn: "تحديث", later_btn: "لاحقًا", locating: "جاري التحديد…", my_location: "موقعي", location_disabled: "لم يتم تفعيل الموقع، اختر مدينتك يدوياً.", now: "حان الوقت", time_passed: "منذ {m} د", tab_morning: "الصباح 🌅", tab_evening: "المساء 🌙", tab_sleep: "النوم 😴", tab_wakeup: "الاستيقاظ ☀️", tab_afterPrayer: "بعد الصلاة 📿", tab_home: "المنزل 🏠", tab_mosque: "المسجد 🕌", tab_worry: "الهم والحزن 💔", tab_travel: "السفر ✈️", tab_illness: "المرض 💊", tab_dua: "أدعية 🤲", tab_daily: "متفرقة 🌟", tab_friday: "الجمعة 🕌", btn_tashkeel: "التشكيل (بَ/ب)", btn_notify: "تنبيه الأذان 🔔", btn_audio_on: "صوت الأذان 🔊", btn_audio_off: "صوت الأذان 🔇", btn_font_inc: "تكبير الخط (A+)", btn_font_dec: "تصغير الخط (A-)", btn_qibla_sec: "🧭 القبلة", btn_learn_sec: "📚 فوائد وتعلم", btn_install: "📲 تثبيت تطبيق تهجد", continue_reading: "📖 متابعة القراءة", pager_prev: "السابق", pager_next: "التالي", pager_copy: "نسخ", pager_ref: "مرجع", pager_done: "تم", pager_source: "المصدر:", loading: "جاري التحميل...", manual_city: "— اختر مدينة يدوياً —" },
+  en: { app_name: "Tahajjud", date_label: "Date", next_prayer: "Next Prayer", city_label: "City", nav_times: "Prayer Times", nav_adhkar: "Adhkar", nav_quran: "Quran", nav_tasbeeh: "Tasbeeh", nav_settings: "Settings", Fajr: "Fajr", Sunrise: "Sunrise", Dhuhr: "Dhuhr", Asr: "Asr", Maghrib: "Maghrib", Isha: "Isha", Duha: "Duha", last_third: "Last Third", lang_label: "Language / اللغة", daily_table: "Daily Prayer Schedule", prayer_th: "Prayer", start_th: "Start", end_th: "End", qibla_angle: "Qibla Angle:", qibla_btn: "Qibla Direction", daily_benefit: "Daily Benefit", tasbeeh_next: "Next", tasbeeh_counter: "Counter", tasbeeh_target: "Target", tasbeeh_btn: "Tasbeeh", tasbeeh_reset: "Reset", quran_title: "Holy Quran", tab_surah: "Surahs", tab_juz: "Juz", tab_page: "Pages", back_btn: "← Back", next_page: "Next ←", prev_page: "→ Prev", search_placeholder: "🔍 Search Surah...", settings_title: "App Settings", extra_sections: "Extra Sections:", appearance: "Appearance & Colors:", reading_alerts: "Reading & Alerts:", prayer_settings: "Prayer Settings:", true_isha_title: "True Isha Time:", hijri_adj_title: "Hijri Date Adjustment:", install_title: "Install App:", learning_title: "Learning & Benefits", sources_title: "Sources & Links", reminders_title: "Reminders", update_msg: "New update available", update_btn: "Update", later_btn: "Later", locating: "Locating...", my_location: "My Location", location_disabled: "Location disabled, choose city manually.", now: "Now", time_passed: "{m}m ago", tab_morning: "Morning 🌅", tab_evening: "Evening 🌙", tab_sleep: "Sleep 😴", tab_wakeup: "Wakeup ☀️", tab_afterPrayer: "After Prayer 📿", tab_home: "Home 🏠", tab_mosque: "Mosque 🕌", tab_worry: "Worry 💔", tab_travel: "Travel ✈️", tab_illness: "Illness 💊", tab_dua: "Dua 🤲", tab_daily: "Daily 🌟", tab_friday: "Friday 🕌", btn_tashkeel: "Diacritics", btn_notify: "Adhan Alert 🔔", btn_audio_on: "Adhan Audio 🔊", btn_audio_off: "Adhan Audio 🔇", btn_font_inc: "Larger Font (A+)", btn_font_dec: "Smaller Font (A-)", btn_qibla_sec: "🧭 Qibla", btn_learn_sec: "📚 Learning", btn_install: "📲 Install App", continue_reading: "📖 Continue Reading", pager_prev: "Prev", pager_next: "Next", pager_copy: "Copy", pager_ref: "Ref", pager_done: "Done", pager_source: "Source:", loading: "Loading...", manual_city: "— Select City Manually —" },
+  ur: { app_name: "تہجد", date_label: "تاریخ", next_prayer: "اگلی نماز", city_label: "شہر", nav_times: "اوقات نماز", nav_adhkar: "اذکار", nav_quran: "قرآن", nav_tasbeeh: "تسبیح", nav_settings: "مزید", Fajr: "فجر", Sunrise: "طلوع آفتاب", Dhuhr: "ظہر", Asr: "عصر", Maghrib: "مغرب", Isha: "عشاء", Duha: "چاشت", last_third: "آخری تہائی", lang_label: "زبان / Language", daily_table: "روزانہ نماز کا شیڈول", prayer_th: "نماز", start_th: "شروع", end_th: "ختم", qibla_angle: "زاویہ قبلہ:", qibla_btn: "سمت قبلہ", daily_benefit: "آج کا فائدہ", tasbeeh_next: "اگلا", tasbeeh_counter: "کاؤنٹر", tasbeeh_target: "ہدف", tasbeeh_btn: "تسبیح", tasbeeh_reset: "ری سیٹ", quran_title: "قرآن مجید", tab_surah: "سورتیں", tab_juz: "پارے", tab_page: "صفحات", back_btn: "← پیچھے", next_page: "اگلا ←", prev_page: "→ پچھلا", search_placeholder: "🔍 سورت تلاش کریں...", settings_title: "ایپ کی ترتیبات", extra_sections: "مزید حصے:", appearance: "ظاہری شکل و رنگ:", reading_alerts: "پڑھنا اور الرٹس:", prayer_settings: "نماز کی ترتیبات:", true_isha_title: "عشاء کا اصل وقت:", hijri_adj_title: "ہجری تاریخ کی ترتیب:", install_title: "ایپ انسٹال کریں:", learning_title: "فوائد اور سیکھنا", sources_title: "ذرائع اور لنکس", reminders_title: "یاد دہانیاں", update_msg: "نئی اپ ڈیٹ دستیاب ہے", update_btn: "اپ ڈیٹ", later_btn: "بعد میں", locating: "تلاش کر رہا ہے...", my_location: "میرا مقام", location_disabled: "مقام غیر فعال ہے۔", now: "وقت ہو گیا", time_passed: "{m} منٹ پہلے", tab_morning: "صبح 🌅", tab_evening: "شام 🌙", tab_sleep: "نیند 😴", tab_wakeup: "بیداری ☀️", tab_afterPrayer: "نماز کے بعد 📿", tab_home: "گھر 🏠", tab_mosque: "مسجد 🕌", tab_worry: "پریشانی 💔", tab_travel: "سفر ✈️", tab_illness: "بیماری 💊", tab_dua: "دعائیں 🤲", tab_daily: "روزانہ 🌟", tab_friday: "جمعہ 🕌", btn_tashkeel: "زیر زبر", btn_notify: "اذان الرٹ 🔔", btn_audio_on: "اذان آواز 🔊", btn_audio_off: "اذان آواز 🔇", btn_font_inc: "بڑا فونٹ (A+)", btn_font_dec: "چھوٹا فونٹ (A-)", btn_qibla_sec: "🧭 قبلہ", btn_learn_sec: "📚 سیکھنا", btn_install: "📲 ایپ انسٹال کریں", continue_reading: "📖 پڑھنا جاری رکھیں", pager_prev: "پچھلا", pager_next: "اگلا", pager_copy: "کاپی", pager_ref: "حوالہ", pager_done: "مکمل", pager_source: "ذریعہ:", loading: "لوڈ ہو رہا ہے...", manual_city: "— دستی شہر منتخب کریں —" },
+  bn: { app_name: "তাহাজ্জুদ", date_label: "তারিখ", next_prayer: "পরবর্তী নামাজ", city_label: "শহর", nav_times: "নামাজের সময়", nav_adhkar: "জিকির", nav_quran: "কুরআন", nav_tasbeeh: "তাসবিহ", nav_settings: "সেটিংস", Fajr: "ফজর", Sunrise: "সূর্যোদয়", Dhuhr: "যোহর", Asr: "আসর", Maghrib: "মাগরিব", Isha: "এশা", Duha: "চাশত", last_third: "শেষ তৃতীয়াংশ", lang_label: "ভাষা / Language", daily_table: "দৈনিক নামাজের সময়সূচী", prayer_th: "নামাজ", start_th: "শুরু", end_th: "শেষ", qibla_angle: "কিবলার কোণ:", qibla_btn: "কিবলার দিক", daily_benefit: "আজকের উপকারিতা", tasbeeh_next: "পরবর্তী", tasbeeh_counter: "কাউন্টার", tasbeeh_target: "লক্ষ্য", tasbeeh_btn: "তাসবিহ", tasbeeh_reset: "রিসেট", quran_title: "পবিত্র কুরআন", tab_surah: "সূরা", tab_juz: "পারা", tab_page: "পৃষ্ঠা", back_btn: "← ফিরে যান", next_page: "পরবর্তী ←", prev_page: "→ পূর্ববর্তী", search_placeholder: "🔍 সূরা অনুসন্ধান...", settings_title: "অ্যাপ সেটিংস", extra_sections: "অতিরিক্ত বিভাগ:", appearance: "উপস্থিতি এবং রঙ:", reading_alerts: "পড়া এবং সতর্কতা:", prayer_settings: "নামাজের সেটিংস:", true_isha_title: "প্রকৃত এশার সময়:", hijri_adj_title: "হিজরি তারিখ সমন্বয়:", install_title: "অ্যাপ ইনস্টল করুন:", learning_title: "শিক্ষা ও উপকারিতা", sources_title: "উৎস এবং লিঙ্ক", reminders_title: "অনুস্মারক", update_msg: "নতুন আপডেট উপলব্ধ", update_btn: "আপডেট", later_btn: "পরে", locating: "অবস্থান নির্ণয়...", my_location: "আমার অবস্থান", location_disabled: "অবস্থান অক্ষম।", now: "এখন", time_passed: "{m} মি. আগে", tab_morning: "সকাল 🌅", tab_evening: "সন্ধ্যা 🌙", tab_sleep: "ঘুম 😴", tab_wakeup: "জাগরণ ☀️", tab_afterPrayer: "নামাজের পর 📿", tab_home: "বাড়ি 🏠", tab_mosque: "মসজিদ 🕌", tab_worry: "দুশ্চিন্তা 💔", tab_travel: "ভ্রমণ ✈️", tab_illness: "অসুস্থতা 💊", tab_dua: "দোয়া 🤲", tab_daily: "দৈনিক 🌟", tab_friday: "শুক্রবার 🕌", btn_tashkeel: "যের যবর", btn_notify: "আজান সতর্কতা 🔔", btn_audio_on: "আজানের শব্দ 🔊", btn_audio_off: "আজানের শব্দ 🔇", btn_font_inc: "বড় ফন্ট (A+)", btn_font_dec: "ছোট ফন্ট (A-)", btn_qibla_sec: "🧭 কিবলা", btn_learn_sec: "📚 শিক্ষা", btn_install: "📲 অ্যাপ ইনস্টল করুন", continue_reading: "📖 পড়া চালিয়ে যান", pager_prev: "পূর্ববর্তী", pager_next: "পরবর্তী", pager_copy: "কপি", pager_ref: "সূত্র", pager_done: "সম্পন্ন", pager_source: "সূত্র:", loading: "লোড হচ্ছে...", manual_city: "— ম্যানুয়ালি শহর নির্বাচন করুন —" },
+  id: { app_name: "Tahajjud", date_label: "Tanggal", next_prayer: "Waktu Shalat", city_label: "Kota", nav_times: "Jadwal", nav_adhkar: "Dzikir", nav_quran: "Al-Qur'an", nav_tasbeeh: "Tasbih", nav_settings: "Pengaturan", Fajr: "Subuh", Sunrise: "Terbit", Dhuhr: "Dzuhur", Asr: "Ashar", Maghrib: "Maghrib", Isha: "Isya", Duha: "Dhuha", last_third: "Sepertiga Malam", lang_label: "Bahasa / Language", daily_table: "Jadwal Shalat Harian", prayer_th: "Shalat", start_th: "Mulai", end_th: "Akhir", qibla_angle: "Sudut Kiblat:", qibla_btn: "Arah Kiblat", daily_benefit: "Manfaat Hari Ini", tasbeeh_next: "Lanjut", tasbeeh_counter: "Penghitung", tasbeeh_target: "Target", tasbeeh_btn: "Tasbih", tasbeeh_reset: "Reset", quran_title: "Al-Qur'an Suci", tab_surah: "Surah", tab_juz: "Juz", tab_page: "Halaman", back_btn: "← Kembali", next_page: "Lanjut ←", prev_page: "→ Prev", search_placeholder: "🔍 Cari Surah...", settings_title: "Pengaturan Aplikasi", extra_sections: "Bagian Tambahan:", appearance: "Tampilan & Warna:", reading_alerts: "Membaca & Peringatan:", prayer_settings: "Pengaturan Shalat:", true_isha_title: "Waktu Isya Sebenarnya:", hijri_adj_title: "Penyesuaian Hijriah:", install_title: "Instal Aplikasi:", learning_title: "Pembelajaran & Manfaat", sources_title: "Sumber & Tautan", reminders_title: "Pengingat", update_msg: "Pembaruan tersedia", update_btn: "Perbarui", later_btn: "Nanti", locating: "Mencari lokasi...", my_location: "Lokasi Saya", location_disabled: "Lokasi dinonaktifkan.", now: "Sekarang", time_passed: "{m}m yg lalu", tab_morning: "Pagi 🌅", tab_evening: "Malam 🌙", tab_sleep: "Tidur 😴", tab_wakeup: "Bangun ☀️", tab_afterPrayer: "Setelah Shalat 📿", tab_home: "Rumah 🏠", tab_mosque: "Masjid 🕌", tab_worry: "Kekhawatiran 💔", tab_travel: "Bepergian ✈️", tab_illness: "Sakit 💊", tab_dua: "Doa 🤲", tab_daily: "Harian 🌟", tab_friday: "Jumat 🕌", btn_tashkeel: "Harakat", btn_notify: "Notifikasi Adzan 🔔", btn_audio_on: "Suara Adzan 🔊", btn_audio_off: "Suara Adzan 🔇", btn_font_inc: "Perbesar Font (A+)", btn_font_dec: "Perkecil Font (A-)", btn_qibla_sec: "🧭 Kiblat", btn_learn_sec: "📚 Belajar", btn_install: "📲 Instal Aplikasi", continue_reading: "📖 Lanjut Membaca", pager_prev: "Seblm", pager_next: "Lanjut", pager_copy: "Salin", pager_ref: "Ref", pager_done: "Selesai", pager_source: "Sumber:", loading: "Memuat...", manual_city: "— Pilih Kota Manual —" },
+  tr: { app_name: "Teheccüd", date_label: "Tarih", next_prayer: "Sonraki Namaz", city_label: "Şehir", nav_times: "Vakitler", nav_adhkar: "Zikirler", nav_quran: "Kuran", nav_tasbeeh: "Tesbih", nav_settings: "Ayarlar", Fajr: "İmsak", Sunrise: "Güneş", Dhuhr: "Öğle", Asr: "İkindi", Maghrib: "Akşam", Isha: "Yatsı", Duha: "Kuşluk", last_third: "Son Üçte Bir", lang_label: "Dil / Language", daily_table: "Günlük Namaz Vakitleri", prayer_th: "Namaz", start_th: "Giriş", end_th: "Çıkış", qibla_angle: "Kıble Açısı:", qibla_btn: "Kıble Yönü", daily_benefit: "Günün Faydası", tasbeeh_next: "İleri", tasbeeh_counter: "Sayaç", tasbeeh_target: "Hedef", tasbeeh_btn: "Tesbih", tasbeeh_reset: "Sıfırla", quran_title: "Kur'an-ı Kerim", tab_surah: "Sureler", tab_juz: "Cüz", tab_page: "Sayfalar", back_btn: "← Geri", next_page: "İleri ←", prev_page: "→ Önceki", search_placeholder: "🔍 Sure Ara...", settings_title: "Uygulama Ayarları", extra_sections: "Ek Bölümler:", appearance: "Görünüm ve Renkler:", reading_alerts: "Okuma ve Uyarılar:", prayer_settings: "Namaz Ayarları:", true_isha_title: "Gerçek Yatsı:", hijri_adj_title: "Hicri Tarih Ayarı:", install_title: "Uygulamayı Yükle:", learning_title: "Öğrenim ve Faydalar", sources_title: "Kaynaklar ve Bağlantılar", reminders_title: "Hatırlatmalar", update_msg: "Güncelleme mevcut", update_btn: "Güncelle", later_btn: "Sonra", locating: "Konum bulunuyor...", my_location: "Konumum", location_disabled: "Konum kapalı.", now: "Şimdi", time_passed: "{m} dk önce", tab_morning: "Sabah 🌅", tab_evening: "Akşam 🌙", tab_sleep: "Uyku 😴", tab_wakeup: "Uyanış ☀️", tab_afterPrayer: "Namaz Sonrası 📿", tab_home: "Ev 🏠", tab_mosque: "Cami 🕌", tab_worry: "Endişe 💔", tab_travel: "Seyahat ✈️", tab_illness: "Hastalık 💊", tab_dua: "Dua 🤲", tab_daily: "Günlük 🌟", tab_friday: "Cuma 🕌", btn_tashkeel: "Harekeler", btn_notify: "Ezan Bildirimi 🔔", btn_audio_on: "Ezan Sesi 🔊", btn_audio_off: "Ezan Sesi 🔇", btn_font_inc: "Yazıyı Büyüt (A+)", btn_font_dec: "Yazıyı Küçült (A-)", btn_qibla_sec: "🧭 Kıble", btn_learn_sec: "📚 Öğrenim", btn_install: "📲 Uygulamayı Yükle", continue_reading: "📖 Okumaya Devam Et", pager_prev: "Önceki", pager_next: "Sonraki", pager_copy: "Kopyala", pager_ref: "Kaynak", pager_done: "Tamam", pager_source: "Kaynak:", loading: "Yükleniyor...", manual_city: "— Şehri Manuel Seçin —" },
+  fa: { app_name: "تهجد", date_label: "تاریخ", next_prayer: "نماز بعدی", city_label: "شهر", nav_times: "اوقات شرعی", nav_adhkar: "اذکار", nav_quran: "قرآن", nav_tasbeeh: "تسبیح", nav_settings: "بیشتر", Fajr: "صبح", Sunrise: "طلوع", Dhuhr: "ظهر", Asr: "عصر", Maghrib: "مغرب", Isha: "عشاء", Duha: "چاشت", last_third: "ثلث آخر", lang_label: "زبان / Language", daily_table: "جدول روزانه اوقات شرعی", prayer_th: "نماز", start_th: "شروع", end_th: "پایان", qibla_angle: "زاویه قبله:", qibla_btn: "جهت قبله", daily_benefit: "فایده روز", tasbeeh_next: "بعدی", tasbeeh_counter: "شمارشگر", tasbeeh_target: "هدف", tasbeeh_btn: "تسبیح", tasbeeh_reset: "بازنشانی", quran_title: "قرآن کریم", tab_surah: "سوره‌ها", tab_juz: "جزءها", tab_page: "صفحات", back_btn: "← بازگشت", next_page: "بعدی ←", prev_page: "→ قبلی", search_placeholder: "🔍 جستجوی سوره...", settings_title: "تنظیمات برنامه", extra_sections: "بخش‌های بیشتر:", appearance: "ظاهر و رنگ‌ها:", reading_alerts: "خواندن و هشدارها:", prayer_settings: "تنظیمات نماز:", true_isha_title: "وقت واقعی عشاء:", hijri_adj_title: "تنظیم تاریخ هجری:", install_title: "نصب برنامه:", learning_title: "یادگیری و فواید", sources_title: "منابع و پیوندها", reminders_title: "یادآوری‌ها", update_msg: "بروزرسانی جدید", update_btn: "بروزرسانی", later_btn: "بعداً", locating: "مکان‌یابی...", my_location: "مکان من", location_disabled: "مکان‌یابی غیرفعال است.", now: "اکنون", time_passed: "{m} دقیقه پیش", tab_morning: "صبح 🌅", tab_evening: "شام 🌙", tab_sleep: "خواب 😴", tab_wakeup: "بیدار شدن ☀️", tab_afterPrayer: "بعد از نماز 📿", tab_home: "خانه 🏠", tab_mosque: "مسجد 🕌", tab_worry: "نگرانی 💔", tab_travel: "سفر ✈️", tab_illness: "بیماری 💊", tab_dua: "دعا 🤲", tab_daily: "روزانه 🌟", tab_friday: "جمعه 🕌", btn_tashkeel: "اعراب‌گذاری", btn_notify: "هشدار اذان 🔔", btn_audio_on: "صدای اذان 🔊", btn_audio_off: "صدای اذان 🔇", btn_font_inc: "بزرگ‌نمایی (A+)", btn_font_dec: "کوچک‌نمایی (A-)", btn_qibla_sec: "🧭 قبله", btn_learn_sec: "📚 یادگیری", btn_install: "📲 نصب برنامه", continue_reading: "📖 ادامه خواندن", pager_prev: "قبلی", pager_next: "بعدی", pager_copy: "کپی", pager_ref: "منبع", pager_done: "انجام شد", pager_source: "منبع:", loading: "در حال بارگذاری...", manual_city: "— انتخاب دستی شهر —" },
+  fr: { app_name: "Tahajjud", date_label: "Date", next_prayer: "Prochaine Prière", city_label: "Ville", nav_times: "Horaires", nav_adhkar: "Adhkar", nav_quran: "Coran", nav_tasbeeh: "Tasbih", nav_settings: "Paramètres", Fajr: "Fajr", Sunrise: "Chourouk", Dhuhr: "Dhohr", Asr: "Asr", Maghrib: "Maghrib", Isha: "Isha", Duha: "Duha", last_third: "Dernier Tiers", lang_label: "Langue / Language", daily_table: "Horaires de Prière", prayer_th: "Prière", start_th: "Début", end_th: "Fin", qibla_angle: "Angle Qibla:", qibla_btn: "Direction Qibla", daily_benefit: "Bénéfice du Jour", tasbeeh_next: "Suivant", tasbeeh_counter: "Compteur", tasbeeh_target: "Cible", tasbeeh_btn: "Tasbih", tasbeeh_reset: "Réinitialiser", quran_title: "Saint Coran", tab_surah: "Sourates", tab_juz: "Juz", tab_page: "Pages", back_btn: "← Retour", next_page: "Suivant ←", prev_page: "→ Précédent", search_placeholder: "🔍 Rechercher...", settings_title: "Paramètres", extra_sections: "Sections Extra:", appearance: "Apparence & Couleurs:", reading_alerts: "Lecture & Alertes:", prayer_settings: "Paramètres Prière:", true_isha_title: "Heure Réelle Isha:", hijri_adj_title: "Ajustement Hijri:", install_title: "Installer l'App:", learning_title: "Apprentissage", sources_title: "Sources & Liens", reminders_title: "Rappels", update_msg: "Nouvelle mise à jour", update_btn: "Mettre à jour", later_btn: "Plus tard", locating: "Localisation...", my_location: "Ma Position", location_disabled: "Localisation désactivée.", now: "Maintenant", time_passed: "Il y a {m}m", tab_morning: "Matin 🌅", tab_evening: "Soir 🌙", tab_sleep: "Sommeil 😴", tab_wakeup: "Réveil ☀️", tab_afterPrayer: "Après Prière 📿", tab_home: "Maison 🏠", tab_mosque: "Mosquée 🕌", tab_worry: "Souci 💔", tab_travel: "Voyage ✈️", tab_illness: "Maladie 💊", tab_dua: "Dua 🤲", tab_daily: "Quotidien 🌟", tab_friday: "Vendredi 🕌", btn_tashkeel: "Diacritiques", btn_notify: "Alerte Adhan 🔔", btn_audio_on: "Audio Adhan 🔊", btn_audio_off: "Audio Adhan 🔇", btn_font_inc: "Agrandir (A+)", btn_font_dec: "Réduire (A-)", btn_qibla_sec: "🧭 Qibla", btn_learn_sec: "📚 Apprentissage", btn_install: "📲 Installer", continue_reading: "📖 Continuer", pager_prev: "Préc.", pager_next: "Suiv.", pager_copy: "Copier", pager_ref: "Réf", pager_done: "Fait", pager_source: "Source:", loading: "Chargement...", manual_city: "— Choisir Ville Manuellement —" }
 };
+
+const NEW_I18N = {
+  ar: { asma_title: "أسماء الله الحسنى", zakat_title: "حاسبة الزكاة", missed_title: "قضاء الصلوات", btn_calc: "احسب الزكاة", zakat_result: "مقدار الزكاة الواجبة:" },
+  en: { asma_title: "99 Names of Allah", zakat_title: "Zakat Calculator", missed_title: "Missed Prayers", btn_calc: "Calculate", zakat_result: "Zakat Due:" }
+};
+Object.keys(I18N).forEach(lang => { Object.assign(I18N[lang], NEW_I18N[lang] || NEW_I18N['ar']); });
+
 let currentLang = LS('lang') || 'ar';
 function t(key) { return I18N[currentLang][key] || I18N['ar'][key] || key; }
 function applyLang() {
@@ -174,6 +181,26 @@ function initUI() {
   }
 
   applyFontSize();
+  let lastScrollY = window.scrollY;
+  window.addEventListener('scroll', () => {
+    const header = qs('header');
+    const bottomNav = qs('.bottom-nav');
+    const readerHeader = qs('#readerHeader');
+    if(!header) return;
+    const currentScrollY = window.scrollY;
+    const delta = currentScrollY - lastScrollY;
+    if (Math.abs(delta) < 8) return; // تجاهل التمرير البسيط جداً لمنع الارتجاج
+    if (delta > 0 && currentScrollY > 70) {
+      header.classList.add('header-hidden'); // إخفاء عند النزول
+      if(bottomNav) bottomNav.classList.add('nav-hidden');
+      if(readerHeader) readerHeader.classList.add('header-hidden');
+    } else if (delta < 0) {
+      header.classList.remove('header-hidden'); // إظهار عند الصعود
+      if(bottomNav) bottomNav.classList.remove('nav-hidden');
+      if(readerHeader) readerHeader.classList.remove('header-hidden');
+    }
+    lastScrollY = currentScrollY;
+  }, { passive: true });
 }
 
 // تحديث دالة showSection لتصبح عالمية وتدعم تحميل البيانات
@@ -194,6 +221,7 @@ async function showSection(id) {
     loaded.learning = true; 
     await Promise.all([loadLearning(), loadResources(), loadDailyBenefit()]); 
   }
+  if (id === 'asma' && !loaded.asma) { loaded.asma = true; loadAsmaUlHusna(); }
 
   // 4. التحكم في ظهور الشريط العلوي (يظهر فقط في أوقات الصلاة)
   const topCard = document.getElementById('topKpiCard');
@@ -298,12 +326,27 @@ function renderNextPrayer(T,fajrTomorrowISO){
 function setQiblaFromCoords(lat,lon){const b=bearing(lat,lon,KAABA.lat,KAABA.lon); setText('qiblaDeg',`${b.toFixed(1)}°`); LS('qiblaBearing',String(b));}
 function loadStoredQibla(){const v=LS('qiblaBearing'); if(v) setText('qiblaDeg',`${parseFloat(v).toFixed(1)}°`)}
 
+function shiftTimingsToDate(timingsObj, targetDate) {
+  const out = {};
+  const ymd = targetDate.getFullYear() + '-' + String(targetDate.getMonth()+1).padStart(2,'0') + '-' + String(targetDate.getDate()).padStart(2,'0');
+  for(let key in timingsObj) {
+    const val = timingsObj[key];
+    // تحديث تواريخ الأوقات المحفوظة لتتطابق مع اليوم الحالي لكي لا يتعطل العداد
+    if(typeof val === 'string' && val.includes('T') && val.length >= 19) {
+       out[key] = ymd + val.substring(10);
+    } else {
+       out[key] = val;
+    }
+  }
+  return out;
+}
+
 async function loadPrayerTimes(forceCity=false){
   setText('ptStatus',''); setText('ptMeta',''); 
   const controls = qs('#locationControls');
   const today=new Date(), tomorrow=new Date(Date.now()+86400000), c=getCityFallback(); 
 
-  const renderTimes = (T, TT, T_True) => {
+  const renderTimes = (T, TT, T_True, save=true) => {
     ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(k=>{ const el = qs('#t_'+k.toLowerCase()+'_s'); if(el) el.textContent = formatTime12h(isoToDate(T[k])); }); 
     const trueIshaTime = isoToDate(T_True.Isha); const elTrueIsha = qs('#t_isha_true_s'); if(elTrueIsha) elTrueIsha.textContent = formatTime12h(trueIshaTime);
     setText('t_fajr_e', formatTime12h(isoToDate(T.Sunrise))); setText('t_dhuhr_e', formatTime12h(isoToDate(T.Asr)));
@@ -311,12 +354,38 @@ async function loadPrayerTimes(forceCity=false){
     const duha=computeDuha(T.Sunrise,T.Dhuhr); setText('t_duha_s', formatTime12h(duha.start)); setText('t_duha_e', formatTime12h(duha.end)); 
     const last=computeLastThird(T.Maghrib,TT.Fajr); setText('t_lastthird_s', formatTime12h(last.start)); setText('t_lastthird_e', formatTime12h(last.end)); 
     renderNextPrayer(T,TT.Fajr);
+
+    // تخزين الأوقات لتعمل في وضع عدم الاتصال (Offline)
+    if(save) {
+      LS('offline_T', JSON.stringify(T)); LS('offline_TT', JSON.stringify(TT)); LS('offline_T_True', JSON.stringify(T_True));
+      LS('offline_last_saved', String(Date.now()));
+    }
+  };
+
+  const useOffline = () => {
+     try {
+        let T = JSON.parse(LS('offline_T')), TT = JSON.parse(LS('offline_TT')), T_True = JSON.parse(LS('offline_T_True'));
+        if(T && TT && T_True) {
+           T = shiftTimingsToDate(T, today); T_True = shiftTimingsToDate(T_True, today); TT = shiftTimingsToDate(TT, tomorrow);
+           renderTimes(T, TT, T_True, false);
+           const lastSaved = parseInt(LS('offline_last_saved') || '0', 10);
+           const daysPassed = lastSaved ? (Date.now() - lastSaved) / 86400000 : 3;
+           const isAccurate = daysPassed <= 2;
+           setText('ptStatus', currentLang==='ar' ? `وضع عدم الاتصال (أوقات ${isAccurate ? 'صحيحة' : 'تقريبية'})` : `Offline Mode (${isAccurate ? 'Accurate' : 'Approximate'} times)`);
+           if(controls) controls.style.display = 'none'; // إخفاء الاختيار اليدوي لأن المشكلة إنترنت وليست موقع
+           const savedCity = getCityFallback(); updateCityKPI(savedCity.label||savedCity.city);
+           return true;
+        }
+     }catch(e){}
+     return false;
   };
 
   try{
+    if(!navigator.onLine) throw new Error('OFFLINE');
+
     if(!forceCity && 'geolocation' in navigator){
       updateCityKPI(t('locating')); 
-      const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:true,timeout:12000,maximumAge:600000})); 
+      const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res, err=>rej(new Error('GEO')),{enableHighAccuracy:true,timeout:12000,maximumAge:600000})); 
       const lat=pos.coords.latitude, lon=pos.coords.longitude; 
       const acc = Math.round(pos.coords.accuracy||0); let accText = 'عالية';
       if(acc > 500) { accText = currentLang==='ar'?'سيئة':'Low'; if(controls) controls.style.display = 'flex'; } 
@@ -332,11 +401,27 @@ async function loadPrayerTimes(forceCity=false){
       renderTimes(td.timings, td2.timings, tdTrue.timings);
     } 
   }catch(e){
-    if(controls) controls.style.display = 'flex'; setText('ptStatus', t('location_disabled')); updateCityKPI(c.label||c.city);
-    try {
-        const td = await fetchTimingsByCity(today,c.city,c.country); const td2 = await fetchTimingsByCity(tomorrow,c.city,c.country); const tdTrue = await fetchTimingsByCity(today,c.city,c.country, 3);
-        renderTimes(td.timings, td2.timings, tdTrue.timings);
-    } catch(ex){}
+    // تمييز مشكلة انقطاع الإنترنت عن مشكلة إغلاق الموقع الجغرافي
+    if(e.message === 'OFFLINE' || !navigator.onLine) {
+       if(!useOffline()) {
+         if(controls) controls.style.display = 'flex'; setText('ptStatus', currentLang==='ar'?'لا يوجد اتصال بالإنترنت':'No internet connection'); updateCityKPI(c.label||c.city);
+       }
+       return;
+    }
+
+    if(e.message === 'GEO') {
+        if(controls) controls.style.display = 'flex'; setText('ptStatus', t('location_disabled')); updateCityKPI(c.label||c.city);
+        try {
+            const td = await fetchTimingsByCity(today,c.city,c.country); const td2 = await fetchTimingsByCity(tomorrow,c.city,c.country); const tdTrue = await fetchTimingsByCity(today,c.city,c.country, 3);
+            renderTimes(td.timings, td2.timings, tdTrue.timings);
+        } catch(ex){
+            if(!useOffline()) setText('ptStatus', t('location_disabled') + ' - ' + (currentLang==='ar'?'فشل التحميل':'Load failed'));
+        }
+    } else {
+        if(!useOffline()) {
+           if(controls) controls.style.display = 'flex'; setText('ptStatus', currentLang==='ar'?'خطأ في الاتصال':'Connection error'); updateCityKPI(c.label||c.city);
+        }
+    }
   }
 }
 
@@ -541,13 +626,13 @@ function renderPager(container,list,keyPrefix){
 function renderDhikrList(container,list,keyPrefix){container.innerHTML=''; renderPager(container,list,keyPrefix);}
 
 async function loadAdhkar(){
-  const fallbackData = {"morning":[],"evening":[],"sleep":[],"wakeup":[],"afterPrayer":[],"home":[],"mosque":[],"daily":[]};
+  const fallbackData = {"morning":[],"evening":[],"sleep":[],"wakeup":[],"afterPrayer":[],"home":[],"mosque":[],"friday":[],"daily":[]};
   rawAdhkarData = await fetchJSON('./data/adhkar.json', fallbackData);
   const tabs=[
     {key:'morning'}, {key:'evening'}, {key:'sleep'},
     {key:'wakeup'}, {key:'afterPrayer'}, {key:'home'},
     {key:'mosque'}, {key:'worry'}, {key:'travel'},
-    {key:'illness'}, {key:'dua'}, {key:'daily'}
+    {key:'illness'}, {key:'dua'}, {key:'friday'}, {key:'daily'}
   ];
   const pills=qs('#adhkarPills'), container=qs('#adhkarContainer'); if(!pills||!container) return; 
   function activate(key){qsa('#adhkarPills button').forEach(b=>b.classList.toggle('active',b.dataset.key===key)); renderDhikrList(container,rawAdhkarData[key]||[],key);} 
@@ -572,7 +657,15 @@ async function loadDailyBenefit() {
 async function loadResources(){const data = await fetchJSON('./data/resources.json', {useful:[]}); const host=qs('#usefulLinks'); if(!host) return; host.innerHTML=''; (data.useful||[]).forEach(g=>{const sec=document.createElement('div'); sec.className='pager-card'; sec.innerHTML=`<h3 class="section-title">${g.group}</h3>`; const ul=document.createElement('ul'); ul.className='custom-list'; (g.items||[]).forEach(it=>{const li=document.createElement('li'); li.innerHTML=`<a href="${it.url}" target="_blank" rel="noopener">${it.title}</a> <span class="small" style="display:block; margin-top:4px;">${it.desc||''}</span>`; ul.appendChild(li);}); sec.appendChild(ul); host.appendChild(sec);});}
 async function loadLearning(){const data = await fetchJSON('./data/learning.json', {plan:[], collections:[], reminders:[]}); const plan=qs('#learnPlan'), col=qs('#learnCollections'), rem=qs('#learnReminders'); if(plan){plan.innerHTML=''; (data.plan||[]).forEach(it=>{const d=document.createElement('div'); d.className='pager-card'; d.innerHTML=`<b style="font-size:1.4rem; color:var(--accent); display:block; margin-bottom:8px;">${it.title}</b><div style="font-size:1.3rem; line-height:1.8;">${it.tip}</div>`; plan.appendChild(d);});} if(col){col.innerHTML=''; (data.collections||[]).forEach(it=>{const li=document.createElement('li'); li.innerHTML=`<a href="${it.url}" target="_blank" rel="noopener">${it.title}</a>`; col.appendChild(li);});} if(rem){rem.innerHTML=''; (data.reminders||[]).forEach(t=>{const li=document.createElement('li'); li.textContent=t; rem.appendChild(li);});}}
 function showUpdateBar(reg){const bar=qs('#updateBar'); if(!bar) return; bar.style.display='flex'; qs('#updateNow')?.addEventListener('click',()=>{if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});},{once:true}); qs('#updateLater')?.addEventListener('click',()=>{bar.style.display='none';},{once:true});}
-async function registerSW(){if(!('serviceWorker' in navigator)) return; const reg=await navigator.serviceWorker.register('./service-worker.js',{scope:'./'}); try{await reg.update();}catch(e){} navigator.serviceWorker.addEventListener('controllerchange',()=>window.location.reload(),{once:true}); if(reg.waiting) showUpdateBar(reg); reg.addEventListener('updatefound',()=>{const sw=reg.installing; if(!sw) return; sw.addEventListener('statechange',()=>{if(sw.state==='installed'&&navigator.serviceWorker.controller) showUpdateBar(reg);});});}
+async function registerSW(){
+  if(!('serviceWorker' in navigator)) return; 
+  const reg=await navigator.serviceWorker.register('./service-worker.js',{scope:'./'}); 
+  let isRefreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=> { if(!isRefreshing) { isRefreshing=true; window.location.reload(); } }); 
+  try{await reg.update();}catch(e){} 
+  if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'}); 
+  reg.addEventListener('updatefound',()=>{const sw=reg.installing; if(!sw) return; sw.addEventListener('statechange',()=>{if(sw.state==='installed'&&navigator.serviceWorker.controller) sw.postMessage({type:'SKIP_WAITING'});});});
+}
 
 qs('#backToSurahs')?.addEventListener('click', () => {
   qs('#quranReader').style.display = 'none';
@@ -580,10 +673,47 @@ qs('#backToSurahs')?.addEventListener('click', () => {
   window.scrollTo({top: 0, behavior: 'smooth'});
 });
 
+async function loadAsmaUlHusna() {
+  const container = qs('#asmaContainer'); if(!container) return;
+  container.innerHTML = `<div style="text-align:center; padding: 20px;">${t('loading')}</div>`;
+  try {
+    const res = await fetch('https://api.aladhan.com/v1/asmaAlHusna');
+    const data = await res.json();
+    container.innerHTML = data.data.map(n => `
+      <div class="asma-card pager-card" style="text-align:center; padding:15px; margin-bottom:10px; background:var(--bg2); border-radius:var(--radius);">
+        <div style="font-size:2.5rem; color:var(--accent); font-weight:bold; margin-bottom:5px;">${n.name}</div>
+        <div style="font-size:1.2rem; color:var(--fg);">${currentLang === 'ar' ? n.en.meaning : (n.transliteration + ' - ' + n.en.meaning)}</div>
+      </div>
+    `).join('');
+  } catch (e) { container.innerHTML = `<div style="text-align:center;">خطأ في تحميل أسماء الله الحسنى.</div>`; }
+}
+
+function setupZakatCalculator() {
+  const btn = qs('#btnCalcZakat'); const res = qs('#zakatResult');
+  if(!btn || !res) return;
+  btn.addEventListener('click', () => {
+    const cash = parseFloat(qs('#zakatCash')?.value) || 0;
+    const gold = parseFloat(qs('#zakatGold')?.value) || 0;
+    const silver = parseFloat(qs('#zakatSilver')?.value) || 0;
+    res.textContent = t('zakat_result') + ' ' + ((cash + gold + silver) * 0.025).toFixed(2);
+    haptic(10);
+  });
+}
+
+function setupMissedPrayers() {
+  ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].forEach(p => {
+    const key = 'missed_' + p; let count = parseInt(LS(key)) || 0;
+    const countEl = qs('#missedCount_' + p); if(!countEl) return;
+    countEl.textContent = count;
+    qs('#btnMissedAdd_' + p)?.addEventListener('click', () => { LS(key, ++count); countEl.textContent = count; haptic(10); });
+    qs('#btnMissedSub_' + p)?.addEventListener('click', () => { if(count > 0) { LS(key, --count); countEl.textContent = count; haptic(10); } });
+  });
+}
+
 async function init(){
   CFG = { calculation: { method: LS('calcMethod') || 'auto', school: LS('calcSchool') || 'auto' }, duha: { startOffsetAfterSunriseMin: 15, endOffsetBeforeDhuhrMin: 10 }, defaultCity: { label: 'مكة المكرمة', city: 'Makkah', country: 'SA' } };
    initScheme(); applyLang(); initUI(); initNav(); initCityList(); renderHijri(); loadStoredQibla(); setupCompass(); setupTasbeeh(); 
-  setupTrueIshaToggle(); 
+  setupTrueIshaToggle(); setupZakatCalculator(); setupMissedPrayers();
   qs('#useLocation')?.addEventListener('click',()=>loadPrayerTimes(false)); 
   await loadPrayerTimes(false); await registerSW();
 }
@@ -596,14 +726,14 @@ async function loadSurahList() {
   const container = document.getElementById('surahList');
   if (!container) return;
   try {
-    const res = await fetch('https://api.alquran.cloud/v1/surah');
+    const res = await fetch(`https://api.alquran.cloud/v1/surah?v=${Date.now()}`);
     const data = await res.json();
     allSurahs = data.data;
     renderSurahs(allSurahs);
     setupQuranSearch();
     setupQuranTabs();
   } catch (e) {
-    container.innerHTML = '<div style="text-align:center;">حدث خطأ في الاتصال.</div>';
+    container.innerHTML = `<div style="text-align:center;color:var(--danger);padding:20px;">حدث خطأ في الاتصال.<br><button class="btn" onclick="loadSurahList()" style="margin-top:15px;">إعادة المحاولة 🔄</button></div>`;
   }
 }
 
@@ -698,10 +828,15 @@ async function openJuz(num) {
   if(controls) controls.style.display = 'none';
   
   try {
-    const res = await fetch(`https://api.alquran.cloud/v1/juz/${num}/quran-uthmani`);
+    const res = await fetch(`https://api.alquran.cloud/v1/juz/${num}/quran-uthmani?v=${Date.now()}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
+    if (!data || !data.data || !data.data.ayahs) throw new Error('بيانات غير مكتملة');
     renderAyahs(data.data.ayahs);
-  } catch (e) { textEl.innerHTML = "خطأ في التحميل"; }
+  } catch (e) {
+    console.error(e);
+    textEl.innerHTML = `<div style="text-align:center;color:var(--danger);padding:20px;line-height:1.6;">تعذر التحميل (${e.message}).<br>تأكد من اتصالك بالإنترنت.<br><br><button class="btn" onclick="openJuz(${num})">إعادة المحاولة 🔄</button></div>`;
+  }
 }
 
 async function openSurah(number, name) {
@@ -713,10 +848,21 @@ async function openSurah(number, name) {
   if(controls) controls.style.display = 'none';
   
   try {
-    const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-uthmani`);
+    const res = await fetch(`https://api.alquran.cloud/v1/surah/${number}/quran-uthmani?v=${Date.now()}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    renderAyahs(data.data.ayahs);
-  } catch (e) { textEl.innerHTML = "خطأ في التحميل"; }
+    if (!data || !data.data || !data.data.ayahs) throw new Error('بيانات غير مكتملة');
+    // إضافة تفاصيل السورة لكل آية لأن الـ API لا يوفرها هنا
+    const ayahs = data.data.ayahs.map(a => {
+      if (!a.surah) a.surah = data.data;
+      return a;
+    });
+    renderAyahs(ayahs);
+  } catch (e) {
+    console.error(e);
+    const safeName = name ? name.replace(/'/g, "\\'") : '';
+    textEl.innerHTML = `<div style="text-align:center;color:var(--danger);padding:20px;line-height:1.6;">تعذر التحميل (${e.message}).<br>تأكد من اتصالك بالإنترنت.<br><br><button class="btn" onclick="openSurah(${number}, '${safeName}')">إعادة المحاولة 🔄</button></div>`;
+  }
 }
 
 async function openPage(pageNum) {
@@ -736,20 +882,130 @@ async function openPage(pageNum) {
     textEl.innerHTML = t('loading');
     
     try {
-        const res = await fetch(`https://api.alquran.cloud/v1/page/${pageNum}/quran-uthmani`);
+        const res = await fetch(`https://api.alquran.cloud/v1/page/${pageNum}/quran-uthmani?v=${Date.now()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
+        if (!data || !data.data || !data.data.ayahs) throw new Error('بيانات غير مكتملة');
         if(data.data.ayahs.length > 0) {
             setText('surahTitle', `${data.data.ayahs[0].surah.name} - ص ${pageNum}`);
         }
         renderAyahs(data.data.ayahs);
-    } catch (e) { textEl.innerHTML = "خطأ في التحميل"; }
+    } catch (e) {
+        console.error(e);
+        textEl.innerHTML = `<div style="text-align:center;color:var(--danger);padding:20px;line-height:1.6;">تعذر التحميل (${e.message}).<br>تأكد من اتصالك بالإنترنت.<br><br><button class="btn" onclick="openPage(${pageNum})">إعادة المحاولة 🔄</button></div>`;
+    }
 }
+
+window.quranAudio = new Audio();
+let audioAyahs = [];
+let currentAudioIndex = 0;
+
+window.playQuranAudio = function() {
+  if(!audioAyahs || audioAyahs.length === 0) return;
+  const btn = document.getElementById('btnPlayQuran');
+  
+  if (!window.quranAudio.paused && window.quranAudio.src) {
+    window.quranAudio.pause();
+    if(btn) btn.innerHTML = '▶️ ' + (currentLang==='ar'?'استماع':'Play');
+    return;
+  }
+  
+  if(btn) btn.innerHTML = '⏸️ ' + (currentLang==='ar'?'إيقاف':'Pause');
+  
+  if(window.quranAudio.src && window.quranAudio.currentTime > 0) {
+      window.quranAudio.play();
+  } else {
+      playAyah(currentAudioIndex);
+  }
+};
+
+function playAyah(index) {
+  if(index >= audioAyahs.length) {
+    const btn = document.getElementById('btnPlayQuran');
+    if(btn) btn.innerHTML = '▶️ ' + (currentLang==='ar'?'استماع':'Play');
+    currentAudioIndex = 0;
+    return;
+  }
+  document.querySelectorAll('.ayah-text').forEach(el => el.classList.remove('ayah-active'));
+  const currentEl = document.getElementById(`ayah-${audioAyahs[index].number}`);
+  if(currentEl) {
+    currentEl.classList.add('ayah-active');
+    const y = currentEl.getBoundingClientRect().top + window.scrollY - 150;
+    window.scrollTo({top: y, behavior: 'smooth'});
+  }
+
+  window.quranAudio.src = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${audioAyahs[index].number}.mp3`;
+  window.quranAudio.play();
+  window.quranAudio.onended = () => {
+    currentAudioIndex++;
+    playAyah(currentAudioIndex);
+  };
+}
+
+window.closeTafsir = function() {
+  document.getElementById('tafsirModal').style.display = 'none';
+};
+
+window.showTafsir = async function(ayahNumber, text) {
+  const modal = document.getElementById('tafsirModal');
+  const content = document.getElementById('tafsirContent');
+  if(!modal || !content) return;
+  
+  // نقل نافذة التفسير إلى خارج الحاويات المتأثرة بالحركة لضمان التمركز الدقيق في منتصف الشاشة
+  if (modal.parentElement !== document.body) {
+    document.body.appendChild(modal);
+  }
+  
+  modal.style.display = 'flex';
+  content.innerHTML = `<div style="text-align:center; padding: 20px;">${t('loading')}</div>`;
+  
+  const tafsirMap = {
+    ar: 'ar.muyassar', en: 'en.sahih', ur: 'ur.jalandhry',
+    bn: 'bn.bengali', id: 'id.indonesian', tr: 'tr.diyanet',
+    fa: 'fa.makarem', fr: 'fr.hamidullah'
+  };
+  const edition = tafsirMap[currentLang] || 'ar.muyassar';
+  
+  try {
+    const res = await fetch(`https://api.alquran.cloud/v1/ayah/${ayahNumber}/${edition}`);
+    const data = await res.json();
+    const tafsirName = data.data.edition.name;
+    content.innerHTML = `
+      <div style="font-size:1.6rem; color:var(--accent); margin-bottom:15px; border-bottom: 1px dashed var(--border); padding-bottom: 10px; text-align:center; line-height: 1.6;">${text}</div>
+      <div style="font-size:1.1rem; color:var(--muted); margin-bottom:5px; text-align:center;">${tafsirName}:</div>
+      <div style="font-size:1.4rem; line-height:1.8; color:var(--fg); text-align:justify;">${data.data.text}</div>
+    `;
+  } catch(e) {
+    content.innerHTML = '<div style="text-align:center; color:var(--danger);">حدث خطأ في جلب التفسير. يرجى التحقق من اتصالك.</div>';
+  }
+};
 
 function renderAyahs(ayahs) {
   let html = '';
+  audioAyahs = ayahs || []; 
+  currentAudioIndex = 0;
+  if(window.quranAudio) { window.quranAudio.pause(); window.quranAudio.src = ''; }
+  const btnPlay = document.getElementById('btnPlayQuran');
+  if (btnPlay) btnPlay.innerHTML = '▶️ ' + (currentLang==='ar'?'استماع':'Play');
+
+  if (!Array.isArray(ayahs)) {
+    document.getElementById('quranText').innerHTML = "<div style='text-align:center;padding:20px;color:var(--danger);'>خطأ: بيانات الآيات غير صالحة. الرجاء التحقق من الاتصال.</div>";
+    return;
+  }
+
   ayahs.forEach(a => {
-    const text = showTashkeel ? a.text : a.text.replace(/[\u064B-\u065F\u0640]/g, '');
-    html += `<span class="ayah-text">${text}</span><span class="ayah-number">${a.numberInSurah}</span> `;
+    let aText = a.text || '';
+    // فصل البسملة لتنسيقها بشكل مستقل
+      const surahNum = a.surah ? a.surah.number : null;
+      if (a.numberInSurah === 1 && surahNum !== 1 && surahNum !== 9) {
+      aText = aText.replace(/^بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ\s?/, '');
+      html += `<div class="basmalah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
+    }
+
+    let text = showTashkeel ? aText : aText.replace(/[\u064B-\u065F\u0640]/g, '');
+    const cleanText = text.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, ' ');
+    
+    html += `<span class="ayah-text" id="ayah-${a.number}" onclick="showTafsir(${a.number}, '${cleanText}')">${text}</span><span class="ayah-number">${a.numberInSurah}</span> `;
   });
   document.getElementById('quranText').innerHTML = html;
   window.scrollTo({top: 0, behavior: 'smooth'});
@@ -759,9 +1015,20 @@ function toggleQuranView(isReading) {
   const surahList = document.getElementById('surahList');
   const quranReader = document.getElementById('quranReader');
   const header = document.querySelector('.quran-header');
+  const mainAppHeader = document.querySelector('header');
+  const bottomNav = document.querySelector('.bottom-nav');
+  
   if(surahList) surahList.style.display = isReading ? 'none' : 'grid';
   if(quranReader) quranReader.style.display = isReading ? 'block' : 'none';
   if(header) header.style.display = isReading ? 'none' : 'block';
+  
+  if(mainAppHeader) { mainAppHeader.style.display = isReading ? 'none' : 'block'; mainAppHeader.classList.remove('header-hidden'); }
+  if(bottomNav) bottomNav.classList.remove('nav-hidden');
+
+  if(!isReading && window.quranAudio) {
+      window.quranAudio.pause();
+      window.quranAudio.src = '';
+  }
 }
 
 function checkLastRead() {
@@ -775,6 +1042,7 @@ function checkLastRead() {
 }
 
 document.getElementById('backToSurahs')?.addEventListener('click', () => {
+  if(window.quranAudio) { window.quranAudio.pause(); window.quranAudio.src = ''; }
   toggleQuranView(false);
   window.scrollTo({top: 0, behavior: 'smooth'});
 });
@@ -818,3 +1086,20 @@ window.addEventListener('appinstalled', () => {
   if (installContainer) installContainer.style.display = 'none';
   deferredPrompt = null;
 });
+
+// دالة حذف الكاش بالكامل وإعادة التحميل
+window.clearAppCache = async function() {
+  if(confirm(currentLang === 'ar' ? 'هل أنت متأكد من رغبتك في حذف الكاش وإعادة تحميل التطبيق؟' : 'Are you sure you want to clear the cache and reload?')) {
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+      window.location.reload(true);
+    } catch(e) { alert('حدث خطأ أثناء محاولة حذف الكاش.'); }
+  }
+};

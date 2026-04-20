@@ -9,6 +9,7 @@
       "afterPrayer": 6,
       "home": 3,
       "mosque": 3,
+      "friday": 3,
       "daily": 10
     }
   },
@@ -348,6 +349,26 @@
       "repeat": 1,
       "source": "صحيح مسلم وسنن ابن ماجه",
       "ref": "https://dorar.net/hadith/search?q=اللهم+إني+أسألك+من+فضلك"
+    }
+  ],
+  "friday": [
+    {
+      "text": "قراءة سورة الكهف: نور مابين الجمعتين.<br><br><button class=\"btn\" style=\"width: 100%; margin-top: 10px; font-size: 1.4rem;\" onclick=\"showSection('quran'); window.openSurah(18, 'سورة الكهف');\">📖 الانتقال لفتح سورة الكهف</button>",
+      "repeat": 1,
+      "source": "السنن الكبرى للبيهقي",
+      "ref": "https://dorar.net/hadith/search?q=من+قرأ+سورة+الكهف+يوم+الجمعة"
+    },
+    {
+      "text": "الإكثار من الصلاة على النبي ﷺ: اللهم صلِّ وسلِّم على نبينا محمد.",
+      "repeat": 100,
+      "source": "سنن أبي داود",
+      "ref": "https://dorar.net/hadith/search?q=أكثروا+علي+من+الصلاة+يوم+الجمعة"
+    },
+    {
+      "text": "تحري ساعة الاستجابة (في آخر ساعة بعد العصر): الإكثار من الدعاء بما تيسر من خيري الدنيا والآخرة.",
+      "repeat": 1,
+      "source": "صحيح البخاري وصحيح مسلم",
+      "ref": "https://dorar.net/hadith/search?q=فيها+ساعة+لا+يوافقها+عبد+مسلم"
     }
   ],
   "daily": [

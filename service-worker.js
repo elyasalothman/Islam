@@ -1,15 +1,17 @@
-const CACHE_NAME = 'rafiq-cache-v1.0.1';
+const CACHE_NAME = 'tahajjud-v1.1.4-offline';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './assets/css/styles.css?v=1.0.0',
-  './assets/js/app.js?v=1.0.0',
+  './assets/css/styles.css?v=1.1.3',
+  './assets/js/app.js?v=1.1.3',
   './assets/js/config.json',
-  './data/benefits.json'
+  './data/benefits.json',
+  './data/adhkar.json',
+  './data/learning.json',
+  './data/resources.json'
 ];
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); 
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
@@ -32,9 +34,20 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // تجاهل الطلبات التي لا تبدأ بـ http لتجنب مشاكل إضافات المتصفح و Live Server
+  if (!event.request.url.startsWith('http')) return;
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+    caches.match(event.request).then((cachedResponse) => {
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
+        // تخزين أي بيانات يتم جلبها (مثل سور القرآن) تلقائياً لتعمل بدون نت لاحقاً
+        caches.open(CACHE_NAME).then((cache) => { cache.put(event.request, networkResponse.clone()); });
+        return networkResponse;
+      }).catch(() => { /* صمت عند عدم وجود إنترنت */ });
+      
+      // إرجاع النسخة المخزنة فوراً إن وجدت، وإلا انتظر تحميلها
+      return cachedResponse || fetchPromise;
     })
   );
 });
